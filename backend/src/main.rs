@@ -43,7 +43,7 @@ async fn main() -> anyhow::Result<()> {
             .init();
     }
 
-    tracing::info!("🚀 Starting DACH Marketplace API...");
+    tracing::info!("🚀 Starting DACH Marketplace API v0.1.1...");
 
     // Load configuration from environment
     let settings = Settings::from_env().map_err(|e| anyhow::anyhow!(e))?;
