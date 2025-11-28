@@ -17,7 +17,7 @@ CREATE INDEX IF NOT EXISTS idx_projects_active ON projects(status, updated_at DE
 
 -- Messages optimization for conversation queries
 CREATE INDEX IF NOT EXISTS idx_messages_conversation_time ON messages(conversation_id, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_messages_unread ON messages(receiver_id, is_read, created_at DESC) WHERE is_read = false;
+CREATE INDEX IF NOT EXISTS idx_messages_unread ON messages(conversation_id, is_read, created_at DESC) WHERE is_read = false;
 
 -- Conversations optimization
 CREATE INDEX IF NOT EXISTS idx_conversations_participant1_updated ON conversations(participant1_id, updated_at DESC);
