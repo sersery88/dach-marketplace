@@ -56,7 +56,11 @@ async fn main() -> anyhow::Result<()> {
     tracing::info!("   Email enabled: {}", settings.has_email());
 
     // Initialize database
-    let db = Database::new(&settings.database.url).await?;
+    let db = Database::new(&settings.database.url).await
+        .map_err(|e| {
+            tracing::error!("Failed to connect to database: {}", e);
+            e
+        })?;
     tracing::info!("✅ Database connected");
 
     // Run migrations
