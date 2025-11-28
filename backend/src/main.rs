@@ -63,9 +63,13 @@ async fn main() -> anyhow::Result<()> {
         })?;
     tracing::info!("✅ Database connected");
 
-    // Run migrations
-    db.run_migrations().await?;
-    tracing::info!("✅ Migrations completed");
+    // Run migrations (skip if SKIP_MIGRATIONS=true, useful for PgBouncer/Supavisor)
+    if std::env::var("SKIP_MIGRATIONS").unwrap_or_default() != "true" {
+        db.run_migrations().await?;
+        tracing::info!("✅ Migrations completed");
+    } else {
+        tracing::info!("⏭️ Migrations skipped (SKIP_MIGRATIONS=true)");
+    }
 
     // Initialize email service if configured
     #[cfg(feature = "email")]
