@@ -1,6 +1,9 @@
 -- Performance optimization indexes
 -- Additional indexes for common query patterns
 
+-- Enable pg_trgm extension for trigram indexes (fuzzy search) - MUST be before gin_trgm_ops indexes
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
 -- Composite indexes for common filters
 CREATE INDEX IF NOT EXISTS idx_services_active_category ON services(category_id, is_active) WHERE is_active = true;
 CREATE INDEX IF NOT EXISTS idx_services_active_featured ON services(is_featured, created_at DESC) WHERE is_active = true;
@@ -44,7 +47,4 @@ CREATE INDEX IF NOT EXISTS idx_services_title_trgm ON services USING gin(title g
 CREATE INDEX IF NOT EXISTS idx_services_description_trgm ON services USING gin(description gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS idx_expert_profiles_headline_trgm ON expert_profiles USING gin(headline gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS idx_expert_profiles_bio_trgm ON expert_profiles USING gin(bio gin_trgm_ops);
-
--- Enable pg_trgm extension for trigram indexes (fuzzy search)
-CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
