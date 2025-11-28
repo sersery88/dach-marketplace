@@ -1,5 +1,5 @@
 -- Expert availability slots
-CREATE TABLE availability_slots (
+CREATE TABLE IF NOT EXISTS availability_slots (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     expert_id UUID NOT NULL REFERENCES expert_profiles(id) ON DELETE CASCADE,
     day_of_week SMALLINT NOT NULL CHECK (day_of_week >= 0 AND day_of_week <= 6), -- 0=Sunday, 6=Saturday
@@ -11,11 +11,11 @@ CREATE TABLE availability_slots (
     CONSTRAINT valid_time_range CHECK (start_time < end_time)
 );
 
-CREATE INDEX idx_availability_slots_expert ON availability_slots(expert_id);
-CREATE INDEX idx_availability_slots_day ON availability_slots(day_of_week);
+CREATE INDEX IF NOT EXISTS idx_availability_slots_expert ON availability_slots(expert_id);
+CREATE INDEX IF NOT EXISTS idx_availability_slots_day ON availability_slots(day_of_week);
 
 -- Expert vacation/blocked dates
-CREATE TABLE blocked_dates (
+CREATE TABLE IF NOT EXISTS blocked_dates (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     expert_id UUID NOT NULL REFERENCES expert_profiles(id) ON DELETE CASCADE,
     start_date DATE NOT NULL,
@@ -25,6 +25,6 @@ CREATE TABLE blocked_dates (
     CONSTRAINT valid_date_range CHECK (start_date <= end_date)
 );
 
-CREATE INDEX idx_blocked_dates_expert ON blocked_dates(expert_id);
-CREATE INDEX idx_blocked_dates_range ON blocked_dates(start_date, end_date);
+CREATE INDEX IF NOT EXISTS idx_blocked_dates_expert ON blocked_dates(expert_id);
+CREATE INDEX IF NOT EXISTS idx_blocked_dates_range ON blocked_dates(start_date, end_date);
 

@@ -1,5 +1,5 @@
 -- Services table
-CREATE TABLE services (
+CREATE TABLE IF NOT EXISTS services (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     expert_id UUID NOT NULL REFERENCES expert_profiles(id) ON DELETE CASCADE,
     category_id UUID NOT NULL REFERENCES categories(id) ON DELETE RESTRICT,
@@ -28,15 +28,15 @@ CREATE TABLE services (
     UNIQUE(expert_id, slug)
 );
 
-CREATE INDEX idx_services_expert ON services(expert_id);
-CREATE INDEX idx_services_category ON services(category_id);
-CREATE INDEX idx_services_active ON services(is_active);
-CREATE INDEX idx_services_featured ON services(is_featured);
-CREATE INDEX idx_services_rating ON services(rating_average DESC);
-CREATE INDEX idx_services_tags ON services USING GIN(tags);
+CREATE INDEX IF NOT EXISTS idx_services_expert ON services(expert_id);
+CREATE INDEX IF NOT EXISTS idx_services_category ON services(category_id);
+CREATE INDEX IF NOT EXISTS idx_services_active ON services(is_active);
+CREATE INDEX IF NOT EXISTS idx_services_featured ON services(is_featured);
+CREATE INDEX IF NOT EXISTS idx_services_rating ON services(rating_average DESC);
+CREATE INDEX IF NOT EXISTS idx_services_tags ON services USING GIN(tags);
 
 -- Service packages (Basic, Standard, Premium)
-CREATE TABLE service_packages (
+CREATE TABLE IF NOT EXISTS service_packages (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     service_id UUID NOT NULL REFERENCES services(id) ON DELETE CASCADE,
     name VARCHAR(50) NOT NULL,
@@ -50,10 +50,10 @@ CREATE TABLE service_packages (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_service_packages_service ON service_packages(service_id);
+CREATE INDEX IF NOT EXISTS idx_service_packages_service ON service_packages(service_id);
 
 -- Projects table
-CREATE TABLE projects (
+CREATE TABLE IF NOT EXISTS projects (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     client_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
     expert_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
@@ -82,14 +82,14 @@ CREATE TABLE projects (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_projects_client ON projects(client_id);
-CREATE INDEX idx_projects_expert ON projects(expert_id);
-CREATE INDEX idx_projects_service ON projects(service_id);
-CREATE INDEX idx_projects_status ON projects(status);
-CREATE INDEX idx_projects_created ON projects(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_projects_client ON projects(client_id);
+CREATE INDEX IF NOT EXISTS idx_projects_expert ON projects(expert_id);
+CREATE INDEX IF NOT EXISTS idx_projects_service ON projects(service_id);
+CREATE INDEX IF NOT EXISTS idx_projects_status ON projects(status);
+CREATE INDEX IF NOT EXISTS idx_projects_created ON projects(created_at DESC);
 
 -- Project milestones
-CREATE TABLE project_milestones (
+CREATE TABLE IF NOT EXISTS project_milestones (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
     title VARCHAR(200) NOT NULL,
@@ -102,10 +102,10 @@ CREATE TABLE project_milestones (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_project_milestones_project ON project_milestones(project_id);
+CREATE INDEX IF NOT EXISTS idx_project_milestones_project ON project_milestones(project_id);
 
 -- Project deliverables
-CREATE TABLE project_deliverables (
+CREATE TABLE IF NOT EXISTS project_deliverables (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
     milestone_id UUID REFERENCES project_milestones(id) ON DELETE SET NULL,
@@ -120,5 +120,5 @@ CREATE TABLE project_deliverables (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_project_deliverables_project ON project_deliverables(project_id);
+CREATE INDEX IF NOT EXISTS idx_project_deliverables_project ON project_deliverables(project_id);
 

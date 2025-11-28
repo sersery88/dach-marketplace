@@ -2,7 +2,7 @@
 -- Migration for Phase 5: Client Features
 
 -- Client profiles table (for clients who want to hire experts)
-CREATE TABLE client_profiles (
+CREATE TABLE IF NOT EXISTS client_profiles (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
     company_name VARCHAR(200),
@@ -22,14 +22,23 @@ CREATE TABLE client_profiles (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_client_profiles_user ON client_profiles(user_id);
-CREATE INDEX idx_client_profiles_verified ON client_profiles(is_verified);
+CREATE INDEX IF NOT EXISTS idx_client_profiles_user ON client_profiles(user_id);
+CREATE INDEX IF NOT EXISTS idx_client_profiles_verified ON client_profiles(is_verified);
 
 -- Project postings (clients post projects for experts to bid on)
-CREATE TYPE project_posting_status AS ENUM ('draft', 'open', 'in_review', 'assigned', 'completed', 'cancelled');
-CREATE TYPE project_posting_budget_type AS ENUM ('fixed', 'hourly', 'range');
+DO $$ BEGIN
+    CREATE TYPE project_posting_status AS ENUM ('draft', 'open', 'in_review', 'assigned', 'completed', 'cancelled');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TABLE project_postings (
+DO $$ BEGIN
+    CREATE TYPE project_posting_budget_type AS ENUM ('fixed', 'hourly', 'range');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+CREATE TABLE IF NOT EXISTS project_postings (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     client_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     title VARCHAR(200) NOT NULL,
@@ -59,16 +68,20 @@ CREATE TABLE project_postings (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_project_postings_client ON project_postings(client_id);
-CREATE INDEX idx_project_postings_status ON project_postings(status);
-CREATE INDEX idx_project_postings_category ON project_postings(category_id);
-CREATE INDEX idx_project_postings_created ON project_postings(created_at DESC);
-CREATE INDEX idx_project_postings_skills ON project_postings USING GIN(skills_required);
+CREATE INDEX IF NOT EXISTS idx_project_postings_client ON project_postings(client_id);
+CREATE INDEX IF NOT EXISTS idx_project_postings_status ON project_postings(status);
+CREATE INDEX IF NOT EXISTS idx_project_postings_category ON project_postings(category_id);
+CREATE INDEX IF NOT EXISTS idx_project_postings_created ON project_postings(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_project_postings_skills ON project_postings USING GIN(skills_required);
 
 -- Proposals (experts submit proposals to project postings)
-CREATE TYPE proposal_status AS ENUM ('pending', 'shortlisted', 'accepted', 'rejected', 'withdrawn');
+DO $$ BEGIN
+    CREATE TYPE proposal_status AS ENUM ('pending', 'shortlisted', 'accepted', 'rejected', 'withdrawn');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TABLE proposals (
+CREATE TABLE IF NOT EXISTS proposals (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     project_posting_id UUID NOT NULL REFERENCES project_postings(id) ON DELETE CASCADE,
     expert_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -91,14 +104,18 @@ CREATE TABLE proposals (
     UNIQUE(project_posting_id, expert_id)
 );
 
-CREATE INDEX idx_proposals_project ON proposals(project_posting_id);
-CREATE INDEX idx_proposals_expert ON proposals(expert_id);
-CREATE INDEX idx_proposals_status ON proposals(status);
+CREATE INDEX IF NOT EXISTS idx_proposals_project ON proposals(project_posting_id);
+CREATE INDEX IF NOT EXISTS idx_proposals_expert ON proposals(expert_id);
+CREATE INDEX IF NOT EXISTS idx_proposals_status ON proposals(status);
 
 -- Booking requests (direct booking without project posting)
-CREATE TYPE booking_status AS ENUM ('pending', 'accepted', 'declined', 'cancelled', 'expired');
+DO $$ BEGIN
+    CREATE TYPE booking_status AS ENUM ('pending', 'accepted', 'declined', 'cancelled', 'expired');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE TABLE booking_requests (
+CREATE TABLE IF NOT EXISTS booking_requests (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     client_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     expert_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -117,12 +134,12 @@ CREATE TABLE booking_requests (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_booking_requests_client ON booking_requests(client_id);
-CREATE INDEX idx_booking_requests_expert ON booking_requests(expert_id);
-CREATE INDEX idx_booking_requests_status ON booking_requests(status);
+CREATE INDEX IF NOT EXISTS idx_booking_requests_client ON booking_requests(client_id);
+CREATE INDEX IF NOT EXISTS idx_booking_requests_expert ON booking_requests(expert_id);
+CREATE INDEX IF NOT EXISTS idx_booking_requests_status ON booking_requests(status);
 
 -- Saved experts (clients can save/favorite experts)
-CREATE TABLE saved_experts (
+CREATE TABLE IF NOT EXISTS saved_experts (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     client_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     expert_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -131,5 +148,5 @@ CREATE TABLE saved_experts (
     UNIQUE(client_id, expert_id)
 );
 
-CREATE INDEX idx_saved_experts_client ON saved_experts(client_id);
+CREATE INDEX IF NOT EXISTS idx_saved_experts_client ON saved_experts(client_id);
 

@@ -4,20 +4,69 @@
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Custom ENUM types
-CREATE TYPE user_role AS ENUM ('client', 'expert', 'admin');
-CREATE TYPE account_status AS ENUM ('pending', 'active', 'suspended', 'deleted');
-CREATE TYPE country AS ENUM ('ch', 'de', 'at');
-CREATE TYPE currency AS ENUM ('chf', 'eur');
-CREATE TYPE language AS ENUM ('de', 'en', 'fr', 'it');
-CREATE TYPE availability_status AS ENUM ('available', 'partially_available', 'busy', 'not_available');
-CREATE TYPE pricing_type AS ENUM ('fixed', 'hourly', 'project_based', 'custom');
-CREATE TYPE project_status AS ENUM ('pending', 'accepted', 'paid', 'in_progress', 'delivered', 'revision', 'completed', 'cancelled', 'disputed', 'refunded');
-CREATE TYPE milestone_status AS ENUM ('pending', 'in_progress', 'completed', 'cancelled');
-CREATE TYPE message_type AS ENUM ('text', 'file', 'image', 'system', 'offer', 'project_update');
+-- Custom ENUM types (using DO blocks for idempotency)
+DO $$ BEGIN
+    CREATE TYPE user_role AS ENUM ('client', 'expert', 'admin');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE account_status AS ENUM ('pending', 'active', 'suspended', 'deleted');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE country AS ENUM ('ch', 'de', 'at');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE currency AS ENUM ('chf', 'eur');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE language AS ENUM ('de', 'en', 'fr', 'it');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE availability_status AS ENUM ('available', 'partially_available', 'busy', 'not_available');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE pricing_type AS ENUM ('fixed', 'hourly', 'project_based', 'custom');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE project_status AS ENUM ('pending', 'accepted', 'paid', 'in_progress', 'delivered', 'revision', 'completed', 'cancelled', 'disputed', 'refunded');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE milestone_status AS ENUM ('pending', 'in_progress', 'completed', 'cancelled');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE message_type AS ENUM ('text', 'file', 'image', 'system', 'offer', 'project_update');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- Users table
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     email VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
@@ -39,13 +88,13 @@ CREATE TABLE users (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_users_role ON users(role);
-CREATE INDEX idx_users_status ON users(status);
-CREATE INDEX idx_users_country ON users(country);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
+CREATE INDEX IF NOT EXISTS idx_users_status ON users(status);
+CREATE INDEX IF NOT EXISTS idx_users_country ON users(country);
 
 -- Categories table
-CREATE TABLE categories (
+CREATE TABLE IF NOT EXISTS categories (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     parent_id UUID REFERENCES categories(id) ON DELETE SET NULL,
     name VARCHAR(100) NOT NULL,
@@ -63,12 +112,12 @@ CREATE TABLE categories (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_categories_parent ON categories(parent_id);
-CREATE INDEX idx_categories_slug ON categories(slug);
-CREATE INDEX idx_categories_active ON categories(is_active);
+CREATE INDEX IF NOT EXISTS idx_categories_parent ON categories(parent_id);
+CREATE INDEX IF NOT EXISTS idx_categories_slug ON categories(slug);
+CREATE INDEX IF NOT EXISTS idx_categories_active ON categories(is_active);
 
 -- Expert profiles table
-CREATE TABLE expert_profiles (
+CREATE TABLE IF NOT EXISTS expert_profiles (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
     headline VARCHAR(200) NOT NULL,
@@ -103,10 +152,10 @@ CREATE TABLE expert_profiles (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_expert_profiles_user ON expert_profiles(user_id);
-CREATE INDEX idx_expert_profiles_verified ON expert_profiles(is_verified);
-CREATE INDEX idx_expert_profiles_featured ON expert_profiles(featured);
-CREATE INDEX idx_expert_profiles_rating ON expert_profiles(rating_average DESC);
-CREATE INDEX idx_expert_profiles_skills ON expert_profiles USING GIN(skills);
-CREATE INDEX idx_expert_profiles_tools ON expert_profiles USING GIN(tools);
+CREATE INDEX IF NOT EXISTS idx_expert_profiles_user ON expert_profiles(user_id);
+CREATE INDEX IF NOT EXISTS idx_expert_profiles_verified ON expert_profiles(is_verified);
+CREATE INDEX IF NOT EXISTS idx_expert_profiles_featured ON expert_profiles(featured);
+CREATE INDEX IF NOT EXISTS idx_expert_profiles_rating ON expert_profiles(rating_average DESC);
+CREATE INDEX IF NOT EXISTS idx_expert_profiles_skills ON expert_profiles USING GIN(skills);
+CREATE INDEX IF NOT EXISTS idx_expert_profiles_tools ON expert_profiles USING GIN(tools);
 

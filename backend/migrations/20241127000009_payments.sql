@@ -2,37 +2,49 @@
 -- Supports Stripe Connect marketplace payments for DACH region
 
 -- Payment status enum
-CREATE TYPE payment_status AS ENUM (
-    'pending',
-    'processing',
-    'succeeded',
-    'failed',
-    'refunded',
-    'partially_refunded',
-    'disputed',
-    'cancelled'
-);
+DO $$ BEGIN
+    CREATE TYPE payment_status AS ENUM (
+        'pending',
+        'processing',
+        'succeeded',
+        'failed',
+        'refunded',
+        'partially_refunded',
+        'disputed',
+        'cancelled'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- Payout status enum
-CREATE TYPE payout_status AS ENUM (
-    'pending',
-    'in_transit',
-    'paid',
-    'failed',
-    'cancelled'
-);
+DO $$ BEGIN
+    CREATE TYPE payout_status AS ENUM (
+        'pending',
+        'in_transit',
+        'paid',
+        'failed',
+        'cancelled'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- Invoice status enum
-CREATE TYPE invoice_status AS ENUM (
-    'draft',
-    'open',
-    'paid',
-    'void',
-    'uncollectible'
-);
+DO $$ BEGIN
+    CREATE TYPE invoice_status AS ENUM (
+        'draft',
+        'open',
+        'paid',
+        'void',
+        'uncollectible'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- Payments table (tracks all payment transactions)
-CREATE TABLE payments (
+CREATE TABLE IF NOT EXISTS payments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
     payer_id UUID NOT NULL REFERENCES users(id),
@@ -57,7 +69,7 @@ CREATE TABLE payments (
 );
 
 -- Payouts table (tracks payouts to experts)
-CREATE TABLE payouts (
+CREATE TABLE IF NOT EXISTS payouts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     expert_id UUID NOT NULL REFERENCES users(id),
     amount INTEGER NOT NULL,  -- Amount in cents
@@ -76,7 +88,7 @@ CREATE TABLE payouts (
 );
 
 -- Invoices table
-CREATE TABLE invoices (
+CREATE TABLE IF NOT EXISTS invoices (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     invoice_number VARCHAR(50) NOT NULL UNIQUE,
     project_id UUID REFERENCES projects(id),
@@ -111,32 +123,35 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS vat_id VARCHAR(50);
 ALTER TABLE users ADD COLUMN IF NOT EXISTS billing_address JSONB DEFAULT '{}';
 
 -- Indexes for payments
-CREATE INDEX idx_payments_project ON payments(project_id);
-CREATE INDEX idx_payments_payer ON payments(payer_id);
-CREATE INDEX idx_payments_payee ON payments(payee_id);
-CREATE INDEX idx_payments_status ON payments(status);
-CREATE INDEX idx_payments_stripe_intent ON payments(stripe_payment_intent_id);
-CREATE INDEX idx_payments_created ON payments(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_payments_project ON payments(project_id);
+CREATE INDEX IF NOT EXISTS idx_payments_payer ON payments(payer_id);
+CREATE INDEX IF NOT EXISTS idx_payments_payee ON payments(payee_id);
+CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status);
+CREATE INDEX IF NOT EXISTS idx_payments_stripe_intent ON payments(stripe_payment_intent_id);
+CREATE INDEX IF NOT EXISTS idx_payments_created ON payments(created_at DESC);
 
 -- Indexes for payouts
-CREATE INDEX idx_payouts_expert ON payouts(expert_id);
-CREATE INDEX idx_payouts_status ON payouts(status);
-CREATE INDEX idx_payouts_created ON payouts(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_payouts_expert ON payouts(expert_id);
+CREATE INDEX IF NOT EXISTS idx_payouts_status ON payouts(status);
+CREATE INDEX IF NOT EXISTS idx_payouts_created ON payouts(created_at DESC);
 
 -- Indexes for invoices
-CREATE INDEX idx_invoices_issuer ON invoices(issuer_id);
-CREATE INDEX idx_invoices_recipient ON invoices(recipient_id);
-CREATE INDEX idx_invoices_project ON invoices(project_id);
-CREATE INDEX idx_invoices_status ON invoices(status);
-CREATE INDEX idx_invoices_number ON invoices(invoice_number);
+CREATE INDEX IF NOT EXISTS idx_invoices_issuer ON invoices(issuer_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_recipient ON invoices(recipient_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_project ON invoices(project_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices(status);
+CREATE INDEX IF NOT EXISTS idx_invoices_number ON invoices(invoice_number);
 
--- Triggers for updated_at
+-- Triggers for updated_at (drop first if exists)
+DROP TRIGGER IF EXISTS update_payments_updated_at ON payments;
 CREATE TRIGGER update_payments_updated_at BEFORE UPDATE ON payments
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_payouts_updated_at ON payouts;
 CREATE TRIGGER update_payouts_updated_at BEFORE UPDATE ON payouts
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_invoices_updated_at ON invoices;
 CREATE TRIGGER update_invoices_updated_at BEFORE UPDATE ON invoices
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
