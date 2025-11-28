@@ -83,11 +83,14 @@ impl Settings {
 
         Ok(Self {
             server: ServerSettings {
-                host: env::var("SERVER_HOST").unwrap_or_else(|_| "127.0.0.1".to_string()),
+                host: env::var("SERVER_HOST")
+                    .or_else(|_| env::var("HOST"))
+                    .unwrap_or_else(|_| "0.0.0.0".to_string()),
                 port: env::var("SERVER_PORT")
+                    .or_else(|_| env::var("PORT"))
                     .unwrap_or_else(|_| "8080".to_string())
                     .parse()
-                    .map_err(|_| "Invalid SERVER_PORT")?,
+                    .map_err(|_| "Invalid SERVER_PORT/PORT")?,
                 environment: env::var("ENVIRONMENT").unwrap_or_else(|_| "development".to_string()),
             },
             database: DatabaseSettings {
