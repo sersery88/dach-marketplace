@@ -67,37 +67,79 @@ impl Database {
             return Ok(options);
         }
 
-        // If direct parsing fails, try to fix the URL by encoding the password
+        // If direct parsing fails, manually parse the connection string
         tracing::info!("Direct URL parsing failed, attempting to parse URL manually...");
 
-        // Parse the URL manually to extract and encode the password
-        let url = url::Url::parse(database_url)
-            .map_err(|e| anyhow::anyhow!("Invalid URL format: {}", e))?;
+        // Expected format: postgresql://user:password@host:port/database?options
+        // or: postgres://user:password@host:port/database?options
+
+        // Remove the scheme
+        let url_without_scheme = database_url
+            .strip_prefix("postgresql://")
+            .or_else(|| database_url.strip_prefix("postgres://"))
+            .ok_or_else(|| anyhow::anyhow!("DATABASE_URL must start with postgresql:// or postgres://"))?;
+
+        // Split off query string if present
+        let (main_part, query_string) = match url_without_scheme.find('?') {
+            Some(idx) => (&url_without_scheme[..idx], Some(&url_without_scheme[idx + 1..])),
+            None => (url_without_scheme, None),
+        };
+
+        // Split into credentials@host_part
+        // Find the LAST @ to handle passwords containing @
+        let at_pos = main_part.rfind('@')
+            .ok_or_else(|| anyhow::anyhow!("DATABASE_URL must contain @ separator"))?;
+
+        let credentials = &main_part[..at_pos];
+        let host_part = &main_part[at_pos + 1..];
+
+        // Parse credentials (user:password) - find FIRST : to handle passwords containing :
+        let colon_pos = credentials.find(':')
+            .ok_or_else(|| anyhow::anyhow!("DATABASE_URL must contain user:password"))?;
+
+        let username = &credentials[..colon_pos];
+        let password = &credentials[colon_pos + 1..];
+
+        // Parse host_part (host:port/database)
+        let (host_port, database) = match host_part.find('/') {
+            Some(idx) => (&host_part[..idx], &host_part[idx + 1..]),
+            None => (host_part, "postgres"),
+        };
+
+        // Parse host:port
+        let (host, port) = match host_port.rfind(':') {
+            Some(idx) => {
+                let port_str = &host_port[idx + 1..];
+                let port: u16 = port_str.parse()
+                    .map_err(|_| anyhow::anyhow!("Invalid port number: {}", port_str))?;
+                (&host_port[..idx], port)
+            }
+            None => (host_port, 5432),
+        };
+
+        tracing::info!("Parsed connection: host={}, port={}, database={}, user={}", host, port, database, username);
 
         // Build PgConnectOptions manually
         let mut options = PgConnectOptions::new()
-            .host(url.host_str().unwrap_or("localhost"))
-            .port(url.port().unwrap_or(5432))
-            .database(url.path().trim_start_matches('/'));
-
-        if !url.username().is_empty() {
-            options = options.username(url.username());
-        }
-
-        if let Some(password) = url.password() {
-            // URL::password() already decodes percent-encoded characters
-            options = options.password(password);
-        }
+            .host(host)
+            .port(port)
+            .database(database)
+            .username(username)
+            .password(password);
 
         // Handle SSL mode from query parameters
-        for (key, value) in url.query_pairs() {
-            if key == "sslmode" {
-                options = match value.as_ref() {
-                    "disable" => options.ssl_mode(sqlx::postgres::PgSslMode::Disable),
-                    "prefer" => options.ssl_mode(sqlx::postgres::PgSslMode::Prefer),
-                    "require" => options.ssl_mode(sqlx::postgres::PgSslMode::Require),
-                    _ => options,
-                };
+        if let Some(qs) = query_string {
+            for pair in qs.split('&') {
+                if let Some((key, value)) = pair.split_once('=') {
+                    if key == "sslmode" {
+                        options = match value {
+                            "disable" => options.ssl_mode(sqlx::postgres::PgSslMode::Disable),
+                            "prefer" => options.ssl_mode(sqlx::postgres::PgSslMode::Prefer),
+                            "require" => options.ssl_mode(sqlx::postgres::PgSslMode::Require),
+                            _ => options,
+                        };
+                    }
+                }
             }
         }
 
