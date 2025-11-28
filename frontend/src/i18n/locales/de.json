@@ -1,0 +1,127 @@
+{
+  "common": {
+    "search": "Suchen",
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "logout": "Abmelden",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "loading": "Laden...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "back": "Zurück",
+    "next": "Weiter",
+    "submit": "Absenden",
+    "viewAll": "Alle anzeigen",
+    "learnMore": "Mehr erfahren"
+  },
+  "nav": {
+    "home": "Startseite",
+    "services": "Dienstleistungen",
+    "experts": "Experten",
+    "howItWorks": "So funktioniert's",
+    "pricing": "Preise",
+    "about": "Über uns",
+    "contact": "Kontakt",
+    "dashboard": "Dashboard",
+    "messages": "Nachrichten",
+    "projects": "Projekte",
+    "profile": "Profil",
+    "settings": "Einstellungen"
+  },
+  "hero": {
+    "title": "Finden Sie die besten Automatisierungs-Experten",
+    "subtitle": "Der führende Marktplatz für KI & Automatisierung in der DACH-Region",
+    "searchPlaceholder": "Was möchten Sie automatisieren?",
+    "cta": "Experten finden",
+    "becomeExpert": "Als Experte registrieren"
+  },
+  "categories": {
+    "title": "Beliebte Kategorien",
+    "workflow": "Workflow-Automatisierung",
+    "ai": "KI & Machine Learning",
+    "data": "Datenintegration",
+    "crm": "CRM-Automatisierung",
+    "ecommerce": "E-Commerce-Automatisierung",
+    "marketing": "Marketing-Automatisierung",
+    "documents": "Dokumentenverarbeitung",
+    "chatbots": "Chatbots & Assistenten"
+  },
+  "experts": {
+    "title": "Top-Experten",
+    "verified": "Verifiziert",
+    "rating": "Bewertung",
+    "projects": "Projekte",
+    "hourlyRate": "Stundensatz",
+    "availability": "Verfügbarkeit",
+    "available": "Verfügbar",
+    "partiallyAvailable": "Teilweise verfügbar",
+    "busy": "Beschäftigt",
+    "notAvailable": "Nicht verfügbar",
+    "viewProfile": "Profil ansehen",
+    "contactExpert": "Experten kontaktieren"
+  },
+  "services": {
+    "title": "Dienstleistungen",
+    "subtitle": "Entdecken Sie professionelle Automatisierungs-Services von verifizierten Experten",
+    "searchPlaceholder": "Service suchen...",
+    "startingAt": "Ab",
+    "deliveryTime": "Lieferzeit",
+    "days": "Tage",
+    "revisions": "Revisionen",
+    "orderNow": "Jetzt bestellen",
+    "contactSeller": "Verkäufer kontaktieren"
+  },
+  "experts": {
+    "title": "Experten finden",
+    "subtitle": "Arbeiten Sie mit den besten Automatisierungs-Experten der DACH-Region",
+    "searchPlaceholder": "Experten suchen...",
+    "verified": "Verifiziert",
+    "rating": "Bewertung",
+    "projects": "Projekte",
+    "hourlyRate": "Stundensatz",
+    "availability": "Verfügbarkeit",
+    "available": "Verfügbar",
+    "partiallyAvailable": "Teilweise verfügbar",
+    "busy": "Beschäftigt",
+    "notAvailable": "Nicht verfügbar",
+    "viewProfile": "Profil ansehen",
+    "contactExpert": "Experten kontaktieren"
+  },
+  "auth": {
+    "loginTitle": "Willkommen zurück",
+    "loginSubtitle": "Melden Sie sich bei Ihrem Konto an",
+    "registerTitle": "Konto erstellen",
+    "registerSubtitle": "Starten Sie noch heute",
+    "email": "E-Mail-Adresse",
+    "password": "Passwort",
+    "confirmPassword": "Passwort bestätigen",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
+    "country": "Land",
+    "forgotPassword": "Passwort vergessen?",
+    "rememberMe": "Angemeldet bleiben",
+    "orContinueWith": "oder fortfahren mit",
+    "noAccount": "Noch kein Konto?",
+    "hasAccount": "Bereits ein Konto?",
+    "termsAgree": "Ich stimme den AGB und der Datenschutzerklärung zu"
+  },
+  "footer": {
+    "tagline": "Der führende Marktplatz für KI & Automatisierung in der DACH-Region",
+    "company": "Unternehmen",
+    "support": "Support",
+    "legal": "Rechtliches",
+    "terms": "AGB",
+    "privacy": "Datenschutz",
+    "imprint": "Impressum",
+    "copyright": "© {{year}} DACH Marketplace. Alle Rechte vorbehalten."
+  },
+  "countries": {
+    "ch": "Schweiz",
+    "de": "Deutschland",
+    "at": "Österreich"
+  }
+}
+

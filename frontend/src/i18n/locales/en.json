@@ -1,0 +1,107 @@
+{
+  "common": {
+    "search": "Search",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "viewAll": "View all",
+    "learnMore": "Learn more"
+  },
+  "nav": {
+    "home": "Home",
+    "services": "Services",
+    "experts": "Experts",
+    "howItWorks": "How it works",
+    "pricing": "Pricing",
+    "about": "About",
+    "contact": "Contact",
+    "dashboard": "Dashboard",
+    "messages": "Messages",
+    "projects": "Projects",
+    "profile": "Profile",
+    "settings": "Settings"
+  },
+  "hero": {
+    "title": "Find the Best Automation Experts",
+    "subtitle": "The leading marketplace for AI & Automation in the DACH region",
+    "searchPlaceholder": "What would you like to automate?",
+    "cta": "Find Experts",
+    "becomeExpert": "Become an Expert"
+  },
+  "categories": {
+    "title": "Popular Categories",
+    "workflow": "Workflow Automation",
+    "ai": "AI & Machine Learning",
+    "data": "Data Integration",
+    "crm": "CRM Automation",
+    "ecommerce": "E-Commerce Automation",
+    "marketing": "Marketing Automation",
+    "documents": "Document Processing",
+    "chatbots": "Chatbots & Assistants"
+  },
+  "experts": {
+    "title": "Top Experts",
+    "verified": "Verified",
+    "rating": "Rating",
+    "projects": "Projects",
+    "hourlyRate": "Hourly Rate",
+    "availability": "Availability",
+    "available": "Available",
+    "partiallyAvailable": "Partially Available",
+    "busy": "Busy",
+    "notAvailable": "Not Available",
+    "viewProfile": "View Profile",
+    "contactExpert": "Contact Expert"
+  },
+  "services": {
+    "title": "Services",
+    "startingAt": "Starting at",
+    "deliveryTime": "Delivery Time",
+    "days": "days",
+    "revisions": "Revisions",
+    "orderNow": "Order Now",
+    "contactSeller": "Contact Seller"
+  },
+  "auth": {
+    "loginTitle": "Welcome Back",
+    "loginSubtitle": "Sign in to your account",
+    "registerTitle": "Create Account",
+    "registerSubtitle": "Get started today",
+    "email": "Email Address",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "country": "Country",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "termsAgree": "I agree to the Terms of Service and Privacy Policy"
+  },
+  "footer": {
+    "tagline": "The leading marketplace for AI & Automation in the DACH region",
+    "company": "Company",
+    "support": "Support",
+    "legal": "Legal",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "imprint": "Imprint",
+    "copyright": "© {{year}} DACH Marketplace. All rights reserved."
+  },
+  "countries": {
+    "ch": "Switzerland",
+    "de": "Germany",
+    "at": "Austria"
+  }
+}
+

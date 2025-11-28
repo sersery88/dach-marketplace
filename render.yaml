@@ -1,0 +1,94 @@
+# Render Blueprint for DACH Marketplace
+# https://render.com/docs/blueprint-spec
+
+services:
+  # Backend API - Rust/Axum
+  - type: web
+    name: dach-marketplace-api
+    runtime: rust
+    region: frankfurt
+    plan: starter
+    buildCommand: cd backend && cargo build --release --features full
+    startCommand: cd backend && ./target/release/dach-marketplace-api
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: DATABASE_URL
+        sync: false  # Set to your Supabase connection string
+      - key: JWT_SECRET
+        sync: false  # Must be at least 32 characters! Generate with: openssl rand -base64 32
+      - key: RUST_LOG
+        value: info
+      - key: ENVIRONMENT
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: PORT
+        value: 10000
+      - key: CORS_ORIGINS
+        sync: false  # Set to your frontend URL, e.g., https://dach-marketplace-web.onrender.com
+      - key: STRIPE_SECRET_KEY
+        sync: false  # Optional: Stripe secret key for payments
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false  # Optional: Stripe webhook signing secret
+      # Optional: Meilisearch for full-text search
+      - key: MEILISEARCH_URL
+        sync: false
+      - key: MEILISEARCH_API_KEY
+        sync: false
+      # Optional: SMTP for email notifications
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: FROM_EMAIL
+        sync: false
+      - key: FROM_NAME
+        value: DACH Marketplace
+      # Optional: S3 for file storage
+      - key: S3_BUCKET
+        sync: false
+      - key: S3_REGION
+        value: eu-central-1
+      - key: S3_ACCESS_KEY
+        sync: false
+      - key: S3_SECRET_KEY
+        sync: false
+      - key: S3_ENDPOINT
+        sync: false
+      # Frontend URL for CORS and email links
+      - key: FRONTEND_URL
+        sync: false
+
+  # Frontend - Static Site
+  - type: web
+    name: dach-marketplace-web
+    runtime: static
+    region: frankfurt
+    plan: starter
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/dist
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      - path: /*
+        name: Permissions-Policy
+        value: camera=(), microphone=(), geolocation=()
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        sync: false  # Set to your backend URL, e.g., https://dach-marketplace-api.onrender.com
+
