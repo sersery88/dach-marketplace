@@ -22,8 +22,9 @@ impl Database {
         // Parse the URL and properly encode the password
         let connect_options = Self::parse_database_url(database_url)
             .map_err(|e| anyhow::anyhow!("Failed to parse DATABASE_URL: {}. URL format: {}", e, redacted_url))?
-            // Disable statement caching for PgBouncer/Supavisor transaction mode compatibility
-            .statement_cache_capacity(0);
+            // Enable PgBouncer mode for Supavisor transaction mode compatibility
+            // This disables prepared statements which don't work with transaction pooling
+            .options([("prepared_statements", "false")]);
 
         let pool = PgPoolOptions::new()
             .max_connections(10)
