@@ -34,6 +34,20 @@ const ProjectDetail = lazy(() => import('@/pages/ProjectDetail').then(m => ({ de
 const PostingDetail = lazy(() => import('@/pages/PostingDetail').then(m => ({ default: m.PostingDetail })));
 const ProjectWorkspace = lazy(() => import('@/pages/ProjectWorkspace').then(m => ({ default: m.ProjectWorkspace })));
 
+// Static pages
+const HowItWorks = lazy(() => import('@/pages/static').then(m => ({ default: m.HowItWorks })));
+const About = lazy(() => import('@/pages/static').then(m => ({ default: m.About })));
+const Pricing = lazy(() => import('@/pages/static').then(m => ({ default: m.Pricing })));
+const Contact = lazy(() => import('@/pages/static').then(m => ({ default: m.Contact })));
+const Help = lazy(() => import('@/pages/static').then(m => ({ default: m.Help })));
+const FAQ = lazy(() => import('@/pages/static').then(m => ({ default: m.FAQ })));
+const Terms = lazy(() => import('@/pages/static').then(m => ({ default: m.Terms })));
+const Privacy = lazy(() => import('@/pages/static').then(m => ({ default: m.Privacy })));
+const Imprint = lazy(() => import('@/pages/static').then(m => ({ default: m.Imprint })));
+const Cookies = lazy(() => import('@/pages/static').then(m => ({ default: m.Cookies })));
+const TrustSafety = lazy(() => import('@/pages/static').then(m => ({ default: m.TrustSafety })));
+const Careers = lazy(() => import('@/pages/static').then(m => ({ default: m.Careers })));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -76,6 +90,19 @@ function App() {
             <Route path="categories/:slug" element={<CategoriesPage />} />
             <Route path="projects" element={<BrowseProjects />} />
             <Route path="projects/:id" element={<ProjectDetail />} />
+            {/* Static pages */}
+            <Route path="how-it-works" element={<HowItWorks />} />
+            <Route path="about" element={<About />} />
+            <Route path="pricing" element={<Pricing />} />
+            <Route path="contact" element={<Contact />} />
+            <Route path="help" element={<Help />} />
+            <Route path="faq" element={<FAQ />} />
+            <Route path="terms" element={<Terms />} />
+            <Route path="privacy" element={<Privacy />} />
+            <Route path="imprint" element={<Imprint />} />
+            <Route path="cookies" element={<Cookies />} />
+            <Route path="trust-safety" element={<TrustSafety />} />
+            <Route path="careers" element={<Careers />} />
           </Route>
 
           {/* Protected routes - require authentication */}

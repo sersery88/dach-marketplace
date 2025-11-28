@@ -1,6 +1,7 @@
 import type { ApiResponse, PaginatedResponse } from '@/types';
 
-const API_BASE_URL = '/api/v1';
+// Use environment variable for API URL, fallback to relative path for development
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
 
 interface RequestOptions extends RequestInit {
   params?: Record<string, string | number | boolean | undefined>;
@@ -25,7 +26,11 @@ class ApiClient {
   }
 
   private buildUrl(endpoint: string, params?: Record<string, string | number | boolean | undefined>): string {
-    const url = new URL(`${this.baseUrl}${endpoint}`, window.location.origin);
+    // Handle both absolute URLs (https://...) and relative paths (/api/v1)
+    const baseUrl = this.baseUrl.startsWith('http')
+      ? this.baseUrl
+      : `${window.location.origin}${this.baseUrl}`;
+    const url = new URL(`${baseUrl}${endpoint}`);
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined) {
