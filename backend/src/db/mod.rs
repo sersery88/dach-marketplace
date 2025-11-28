@@ -7,9 +7,8 @@ pub struct Database {
 }
 
 impl Database {
-    /// Create a new database connection pool
+    /// Create a new database connection pool with retry logic for Supavisor compatibility
     pub async fn new(database_url: &str) -> anyhow::Result<Self> {
-
         // Log the database URL (redacted for security)
         let redacted_url = if database_url.contains('@') {
             let parts: Vec<&str> = database_url.splitn(2, '@').collect();
@@ -26,15 +25,53 @@ impl Database {
             // This prevents "prepared statement already exists" errors
             .statement_cache_capacity(0);
 
-        let pool = PgPoolOptions::new()
-            .max_connections(10)
-            .min_connections(2)
-            .acquire_timeout(std::time::Duration::from_secs(30))
-            .idle_timeout(std::time::Duration::from_secs(600))
-            .connect_with(connect_options)
-            .await?;
+        // Retry logic for Supavisor SCRAM-SHA-256 authentication issues
+        // Sometimes the first connection attempt fails due to connection pooler timing
+        let max_retries = 5;
+        let mut last_error = None;
 
-        Ok(Self { pool })
+        for attempt in 1..=max_retries {
+            tracing::info!("Database connection attempt {}/{}", attempt, max_retries);
+
+            let pool_result = PgPoolOptions::new()
+                .max_connections(10)
+                .min_connections(1)
+                .acquire_timeout(std::time::Duration::from_secs(30))
+                .idle_timeout(std::time::Duration::from_secs(600))
+                .connect_with(connect_options.clone())
+                .await;
+
+            match pool_result {
+                Ok(pool) => {
+                    tracing::info!("Database connection successful on attempt {}", attempt);
+                    return Ok(Self { pool });
+                }
+                Err(e) => {
+                    let error_msg = e.to_string();
+                    tracing::warn!("Connection attempt {} failed: {}", attempt, error_msg);
+                    last_error = Some(e);
+
+                    // Only retry on SCRAM/SASL authentication errors (Supavisor timing issue)
+                    if error_msg.contains("SASL") || error_msg.contains("SCRAM") || error_msg.contains("authentication") {
+                        if attempt < max_retries {
+                            let delay = std::time::Duration::from_millis(500 * attempt as u64);
+                            tracing::info!("Retrying in {:?}...", delay);
+                            tokio::time::sleep(delay).await;
+                            continue;
+                        }
+                    } else {
+                        // For other errors, fail immediately
+                        return Err(anyhow::anyhow!("Database connection failed: {}", error_msg));
+                    }
+                }
+            }
+        }
+
+        Err(anyhow::anyhow!(
+            "Failed to connect to database after {} attempts. Last error: {}",
+            max_retries,
+            last_error.map(|e| e.to_string()).unwrap_or_else(|| "Unknown".to_string())
+        ))
     }
 
     /// Run database migrations
