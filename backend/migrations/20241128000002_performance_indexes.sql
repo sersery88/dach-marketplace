@@ -36,7 +36,7 @@ CREATE INDEX IF NOT EXISTS idx_project_postings_status_created ON project_postin
 CREATE INDEX IF NOT EXISTS idx_project_postings_category ON project_postings(category_id, status) WHERE status = 'open';
 
 -- Proposals optimization
-CREATE INDEX IF NOT EXISTS idx_proposals_posting_status ON proposals(posting_id, status);
+CREATE INDEX IF NOT EXISTS idx_proposals_posting_status ON proposals(project_posting_id, status);
 CREATE INDEX IF NOT EXISTS idx_proposals_expert ON proposals(expert_id, status, created_at DESC);
 
 -- Full-text search indexes (if not using Meilisearch)
