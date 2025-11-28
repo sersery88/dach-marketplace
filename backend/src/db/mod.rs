@@ -11,12 +11,20 @@ pub struct Database {
 impl Database {
     /// Create a new database connection pool
     pub async fn new(database_url: &str) -> anyhow::Result<Self> {
+        use sqlx::postgres::PgConnectOptions;
+        use std::str::FromStr;
+
+        // Parse the connection options and configure for Supabase pooler compatibility
+        let connect_options = PgConnectOptions::from_str(database_url)?
+            // Disable statement caching for PgBouncer/Supavisor transaction mode compatibility
+            .statement_cache_capacity(0);
+
         let pool = PgPoolOptions::new()
             .max_connections(10)
             .min_connections(2)
             .acquire_timeout(std::time::Duration::from_secs(30))
             .idle_timeout(std::time::Duration::from_secs(600))
-            .connect(database_url)
+            .connect_with(connect_options)
             .await?;
 
         Ok(Self { pool })
