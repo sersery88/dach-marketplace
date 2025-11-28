@@ -20,15 +20,15 @@ CREATE INDEX IF NOT EXISTS idx_messages_conversation_time ON messages(conversati
 CREATE INDEX IF NOT EXISTS idx_messages_unread ON messages(conversation_id, is_read, created_at DESC) WHERE is_read = false;
 
 -- Conversations optimization
-CREATE INDEX IF NOT EXISTS idx_conversations_participant1_updated ON conversations(participant1_id, updated_at DESC);
-CREATE INDEX IF NOT EXISTS idx_conversations_participant2_updated ON conversations(participant2_id, updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_conversations_participant1_updated ON conversations(participant_one_id, updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_conversations_participant2_updated ON conversations(participant_two_id, updated_at DESC);
 
 -- Reviews optimization
 CREATE INDEX IF NOT EXISTS idx_reviews_service_rating ON reviews(service_id, rating DESC) WHERE is_public = true;
-CREATE INDEX IF NOT EXISTS idx_reviews_expert_rating ON reviews(expert_id, rating DESC) WHERE is_public = true;
+CREATE INDEX IF NOT EXISTS idx_reviews_reviewee_rating ON reviews(reviewee_id, rating DESC) WHERE is_public = true;
 
 -- Payments optimization
-CREATE INDEX IF NOT EXISTS idx_payments_user_status ON payments(user_id, status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_payments_payer_status ON payments(payer_id, status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_payments_project ON payments(project_id, status);
 
 -- Project postings optimization
