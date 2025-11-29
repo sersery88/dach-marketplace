@@ -16,7 +16,11 @@ export {
   SkeletonExpertCard,
   SkeletonServiceCard,
   SkeletonTable,
-  SkeletonProfile
+  SkeletonProfile,
+  SkeletonDashboardStats,
+  SkeletonListItem,
+  SkeletonList,
+  SkeletonPage
 } from './Skeleton';
 export {
   ToastProvider,

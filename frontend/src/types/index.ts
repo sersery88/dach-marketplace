@@ -437,6 +437,7 @@ export interface ExpertSearchFilters {
 export interface ServiceSearchFilters {
   q?: string;
   categoryId?: string;
+  expertId?: string;
   minPrice?: number;
   maxPrice?: number;
   minRating?: number;

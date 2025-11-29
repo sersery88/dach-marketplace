@@ -3,7 +3,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Layout } from '@/components/layout';
 import { ToastProvider, Skeleton } from '@/components/ui';
-import { ProtectedRoute, GuestRoute } from '@/components/auth';
+import { ProtectedRoute, GuestRoute, DashboardRouter } from '@/components/auth';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 // Import i18n configuration
 import '@/i18n';
@@ -17,7 +18,7 @@ const ExpertProfile = lazy(() => import('@/pages/ExpertProfile').then(m => ({ de
 const Login = lazy(() => import('@/pages/Login').then(m => ({ default: m.Login })));
 const Register = lazy(() => import('@/pages/Register').then(m => ({ default: m.Register })));
 const ForgotPassword = lazy(() => import('@/pages/ForgotPassword').then(m => ({ default: m.ForgotPassword })));
-const ClientDashboard = lazy(() => import('@/pages/ClientDashboard').then(m => ({ default: m.ClientDashboard })));
+const ExpertDashboard = lazy(() => import('@/pages/ExpertDashboard').then(m => ({ default: m.ExpertDashboard })));
 const CreatePosting = lazy(() => import('@/pages/CreatePosting').then(m => ({ default: m.CreatePosting })));
 const Postings = lazy(() => import('@/pages/Postings').then(m => ({ default: m.Postings })));
 const Search = lazy(() => import('@/pages/Search').then(m => ({ default: m.Search })));
@@ -74,6 +75,7 @@ function PageLoader() {
 
 function App() {
   return (
+    <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <ToastProvider>
       <BrowserRouter>
@@ -110,7 +112,14 @@ function App() {
           <Route path="/dashboard" element={<Layout />}>
             <Route index element={
               <ProtectedRoute>
-                <ClientDashboard />
+                <DashboardRouter />
+              </ProtectedRoute>
+            } />
+          </Route>
+          <Route path="/expert-dashboard" element={<Layout />}>
+            <Route index element={
+              <ProtectedRoute roles={['expert']}>
+                <ExpertDashboard />
               </ProtectedRoute>
             } />
           </Route>
@@ -216,6 +225,7 @@ function App() {
       </BrowserRouter>
       </ToastProvider>
     </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

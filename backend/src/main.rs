@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use tokio::net::TcpListener;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, fmt};
 
@@ -47,13 +45,13 @@ async fn main() -> anyhow::Result<()> {
 
     // Load configuration from environment
     let settings = Settings::from_env().map_err(|e| anyhow::anyhow!(e))?;
-    let settings = Arc::new(settings);
 
     tracing::info!("✅ Configuration loaded");
     tracing::info!("   Environment: {}", settings.server.environment);
     tracing::info!("   Search enabled: {}", settings.has_search());
     tracing::info!("   Payments enabled: {}", settings.has_payments());
     tracing::info!("   Email enabled: {}", settings.has_email());
+    tracing::info!("   Rate limit: {} req/s", settings.rate_limit.requests_per_second);
 
     // Initialize database
     let db = Database::new(&settings.database.url).await
@@ -71,9 +69,12 @@ async fn main() -> anyhow::Result<()> {
         tracing::info!("⏭️ Migrations skipped (SKIP_MIGRATIONS=true)");
     }
 
+    // Create application state with rate limiter
+    let mut state = AppState::new(db, settings);
+
     // Initialize email service if configured
     #[cfg(feature = "email")]
-    let email_service = if let Some(ref email_settings) = settings.email {
+    if let Some(ref email_settings) = state.settings.email {
         match EmailService::new(
             &email_settings.smtp_host,
             email_settings.smtp_port,
@@ -84,30 +85,19 @@ async fn main() -> anyhow::Result<()> {
         ) {
             Ok(service) => {
                 tracing::info!("✅ Email service initialized");
-                Some(Arc::new(service))
+                state = state.with_email(service);
             }
             Err(e) => {
                 tracing::warn!("⚠️ Email service failed to initialize: {}", e);
-                None
             }
         }
-    } else {
-        None
-    };
-
-    // Create application state
-    let state = AppState {
-        db,
-        settings: settings.clone(),
-        #[cfg(feature = "email")]
-        email: email_service,
-    };
+    }
 
     // Build the application
-    let app = create_app(state);
+    let app = create_app(state.clone());
 
     // Start server
-    let addr = format!("{}:{}", settings.server.host, settings.server.port);
+    let addr = format!("{}:{}", state.settings.server.host, state.settings.server.port);
     let listener = TcpListener::bind(&addr).await?;
 
     tracing::info!("🌐 Server listening on http://{}", addr);

@@ -22,6 +22,7 @@ pub mod utils;
 
 use crate::config::Settings;
 use crate::db::Database;
+use crate::middleware::rate_limit::{create_rate_limiter, GlobalRateLimiter};
 #[cfg(feature = "email")]
 use crate::services::EmailService;
 
@@ -30,13 +31,36 @@ use crate::services::EmailService;
 pub struct AppState {
     pub db: Database,
     pub settings: Arc<Settings>,
+    pub rate_limiter: GlobalRateLimiter,
     #[cfg(feature = "email")]
     pub email: Option<Arc<EmailService>>,
+}
+
+impl AppState {
+    /// Create a new AppState with rate limiter
+    pub fn new(db: Database, settings: Settings) -> Self {
+        let rate_limiter = create_rate_limiter(settings.rate_limit.requests_per_second);
+        Self {
+            db,
+            rate_limiter,
+            settings: Arc::new(settings),
+            #[cfg(feature = "email")]
+            email: None,
+        }
+    }
+
+    /// Create AppState with email service
+    #[cfg(feature = "email")]
+    pub fn with_email(mut self, email: EmailService) -> Self {
+        self.email = Some(Arc::new(email));
+        self
+    }
 }
 
 /// Create the application router
 pub fn create_app(state: AppState) -> Router {
     let settings = &state.settings;
+    let rate_limiter = state.rate_limiter.clone();
 
     // Build CORS layer
     let cors = if settings.is_production() {
@@ -62,6 +86,11 @@ pub fn create_app(state: AppState) -> Router {
 
     let app = Router::new()
         .nest("/api/v1", routes::api_routes())
+        // Rate limiting middleware (in production only)
+        .layer(axum::middleware::from_fn(move |req, next| {
+            let limiter = rate_limiter.clone();
+            middleware::rate_limit::rate_limit_middleware(limiter, req, next)
+        }))
         // Request ID tracking for distributed tracing
         .layer(PropagateRequestIdLayer::new(x_request_id.clone()))
         .layer(SetRequestIdLayer::new(x_request_id, MakeRequestUuid))

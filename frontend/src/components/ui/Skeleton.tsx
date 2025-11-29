@@ -121,3 +121,71 @@ export function SkeletonProfile() {
   );
 }
 
+export function SkeletonDashboardStats() {
+  return (
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="bg-white rounded-xl p-4 border border-neutral-200">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-12 w-12 rounded-lg" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-6 w-16" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function SkeletonListItem() {
+  return (
+    <div className="flex items-center gap-4 p-4">
+      <Skeleton className="h-12 w-12 rounded-lg" />
+      <div className="flex-1 space-y-2">
+        <Skeleton className="h-4 w-3/4" />
+        <Skeleton className="h-3 w-1/2" />
+      </div>
+      <Skeleton className="h-6 w-16 rounded-full" />
+    </div>
+  );
+}
+
+export function SkeletonList({ rows = 5 }: { rows?: number }) {
+  return (
+    <div className="divide-y divide-neutral-100">
+      {Array.from({ length: rows }).map((_, i) => (
+        <SkeletonListItem key={i} />
+      ))}
+    </div>
+  );
+}
+
+export function SkeletonPage() {
+  return (
+    <div className="min-h-screen bg-neutral-50 p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        <div className="flex justify-between items-center">
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <SkeletonDashboardStats />
+        <div className="grid lg:grid-cols-2 gap-6">
+          <div className="bg-white rounded-xl p-6 border border-neutral-200 space-y-4">
+            <Skeleton className="h-6 w-40" />
+            <SkeletonList rows={3} />
+          </div>
+          <div className="bg-white rounded-xl p-6 border border-neutral-200 space-y-4">
+            <Skeleton className="h-6 w-40" />
+            <SkeletonList rows={3} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+

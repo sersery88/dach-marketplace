@@ -7,6 +7,7 @@ export { Login } from './Login';
 export { Register } from './Register';
 export { ForgotPassword } from './ForgotPassword';
 export { ClientDashboard } from './ClientDashboard';
+export { ExpertDashboard } from './ExpertDashboard';
 export { CreatePosting } from './CreatePosting';
 export { Postings } from './Postings';
 export { Search } from './Search';
