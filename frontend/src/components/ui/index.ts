@@ -38,3 +38,4 @@ export {
   DropdownLabel,
   Select
 } from './Dropdown';
+export { OptimizedImage, Avatar } from './OptimizedImage';

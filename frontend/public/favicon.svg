@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <defs>
+    <linearGradient id="fgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e40af"/>
+      <stop offset="50%" style="stop-color:#2563eb"/>
+      <stop offset="100%" style="stop-color:#0d9488"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="32" height="32" rx="6" fill="url(#fgGradient)"/>
+  
+  <!-- Flow waves -->
+  <path d="M6 12 Q12 8, 18 12 T30 12" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.8"/>
+  <path d="M6 16 Q12 12, 18 16 T30 16" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M6 20 Q12 16, 18 20 T30 20" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.8"/>
+  
+  <!-- DACH dots -->
+  <circle cx="8" cy="6" r="1.5" fill="#dc2626"/>
+  <circle cx="13" cy="6" r="1.5" fill="white" opacity="0.9"/>
+  <circle cx="18" cy="6" r="1.5" fill="#dc2626"/>
+</svg>
+

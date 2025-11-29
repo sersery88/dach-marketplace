@@ -25,7 +25,7 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    sourcemap: false, // Disable sourcemaps in production for smaller bundles
     rollupOptions: {
       output: {
         manualChunks(id: string) {
@@ -37,17 +37,39 @@ export default defineConfig({
             if (id.includes('@tanstack/react-query')) {
               return 'vendor-query';
             }
-            if (id.includes('framer-motion') || id.includes('lucide-react')) {
-              return 'vendor-ui';
+            if (id.includes('framer-motion')) {
+              return 'vendor-motion';
+            }
+            if (id.includes('lucide-react')) {
+              return 'vendor-icons';
             }
             if (id.includes('i18next')) {
               return 'vendor-i18n';
+            }
+            if (id.includes('zod') || id.includes('react-hook-form')) {
+              return 'vendor-forms';
+            }
+            if (id.includes('@dr.pogodin/react-helmet')) {
+              return 'vendor-seo';
             }
           }
         },
       },
     },
     // Increase chunk size warning limit
-    chunkSizeWarningLimit: 600,
+    chunkSizeWarningLimit: 500,
+    // Asset optimization
+    assetsInlineLimit: 4096, // Inline assets < 4kb
+  },
+  // Enable dependency pre-bundling optimizations
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      '@tanstack/react-query',
+      'framer-motion',
+      'zustand',
+    ],
   },
 })

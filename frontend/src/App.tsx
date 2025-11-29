@@ -18,6 +18,8 @@ const ExpertProfile = lazy(() => import('@/pages/ExpertProfile').then(m => ({ de
 const Login = lazy(() => import('@/pages/Login').then(m => ({ default: m.Login })));
 const Register = lazy(() => import('@/pages/Register').then(m => ({ default: m.Register })));
 const ForgotPassword = lazy(() => import('@/pages/ForgotPassword').then(m => ({ default: m.ForgotPassword })));
+const VerifyEmail = lazy(() => import('@/pages/VerifyEmail').then(m => ({ default: m.VerifyEmail })));
+const ResetPassword = lazy(() => import('@/pages/ResetPassword').then(m => ({ default: m.ResetPassword })));
 const ExpertDashboard = lazy(() => import('@/pages/ExpertDashboard').then(m => ({ default: m.ExpertDashboard })));
 const CreatePosting = lazy(() => import('@/pages/CreatePosting').then(m => ({ default: m.CreatePosting })));
 const Postings = lazy(() => import('@/pages/Postings').then(m => ({ default: m.Postings })));
@@ -35,6 +37,8 @@ const BrowseProjects = lazy(() => import('@/pages/BrowseProjects').then(m => ({ 
 const ProjectDetail = lazy(() => import('@/pages/ProjectDetail').then(m => ({ default: m.ProjectDetail })));
 const PostingDetail = lazy(() => import('@/pages/PostingDetail').then(m => ({ default: m.PostingDetail })));
 const ProjectWorkspace = lazy(() => import('@/pages/ProjectWorkspace').then(m => ({ default: m.ProjectWorkspace })));
+const Settings = lazy(() => import('@/pages/Settings').then(m => ({ default: m.Settings })));
+const NotFound = lazy(() => import('@/pages/NotFound').then(m => ({ default: m.NotFound })));
 
 // Static pages
 const HowItWorks = lazy(() => import('@/pages/static').then(m => ({ default: m.HowItWorks })));
@@ -154,6 +158,13 @@ function App() {
               </ProtectedRoute>
             } />
           </Route>
+          <Route path="/settings" element={<Layout />}>
+            <Route index element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            } />
+          </Route>
           <Route path="/payments" element={<Layout />}>
             <Route index element={
               <ProtectedRoute>
@@ -220,6 +231,15 @@ function App() {
               <ForgotPassword />
             </GuestRoute>
           } />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/reset-password" element={
+            <GuestRoute>
+              <ResetPassword />
+            </GuestRoute>
+          } />
+
+          {/* 404 - Catch all unmatched routes */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
         </Suspense>
       </BrowserRouter>

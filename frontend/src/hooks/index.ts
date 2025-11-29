@@ -8,4 +8,5 @@ export * from './usePostings';
 export * from './useProjects';
 export * from './useReviews';
 export * from './useAdmin';
+export * from './useBreakpoint';
 

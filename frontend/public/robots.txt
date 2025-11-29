@@ -1,0 +1,35 @@
+# DACHFlow - Robots.txt
+# https://dachflow.com
+
+User-agent: *
+Allow: /
+
+# Static pages
+Allow: /about
+Allow: /how-it-works
+Allow: /pricing
+Allow: /faq
+Allow: /contact
+Allow: /terms
+Allow: /privacy
+Allow: /imprint
+
+# Public listings
+Allow: /experts
+Allow: /services
+Allow: /search
+
+# Disallow user-specific pages
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /messages
+Disallow: /workspace
+Disallow: /admin
+Disallow: /checkout
+
+# API endpoints
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://dachflow.com/sitemap.xml
+

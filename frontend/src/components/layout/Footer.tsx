@@ -1,10 +1,24 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Linkedin, Twitter, Github, Mail } from 'lucide-react';
+import { Linkedin, Twitter, Github, Mail, Send, CheckCircle, Shield, CreditCard, Lock } from 'lucide-react';
+import { Logo } from '@/components/brand';
+import { Button } from '@/components/ui';
 
 export function Footer() {
   const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
+  const [email, setEmail] = useState('');
+  const [subscribed, setSubscribed] = useState(false);
+
+  const handleNewsletterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email) {
+      // TODO: Implement newsletter subscription
+      setSubscribed(true);
+      setEmail('');
+    }
+  };
 
   const footerLinks = {
     company: [
@@ -40,12 +54,9 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           {/* Brand */}
           <div className="col-span-2">
-            <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">D</span>
-              </div>
-              <span className="font-bold text-xl text-white">DACH<span className="text-primary-400">Flow</span></span>
-            </Link>
+            <div className="mb-4">
+              <Logo variant="white" size="md" />
+            </div>
             <p className="text-neutral-400 text-sm mb-6 max-w-xs">
               {t('footer.tagline')}
             </p>
@@ -115,8 +126,67 @@ export function Footer() {
           </div>
         </div>
 
+        {/* Newsletter Section */}
+        <div className="border-t border-neutral-800 mt-12 pt-8">
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div>
+              <h3 className="font-semibold text-white mb-2">Newsletter abonnieren</h3>
+              <p className="text-sm text-neutral-400">Erhalten Sie die neuesten Updates zu Automatisierung und KI.</p>
+            </div>
+            <form onSubmit={handleNewsletterSubmit} className="flex gap-2">
+              {subscribed ? (
+                <div className="flex items-center gap-2 text-green-400">
+                  <CheckCircle className="w-5 h-5" />
+                  <span>Erfolgreich abonniert!</span>
+                </div>
+              ) : (
+                <>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="ihre@email.com"
+                    className="flex-1 px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-lg text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    required
+                  />
+                  <Button type="submit" size="md">
+                    <Send className="w-4 h-4" />
+                  </Button>
+                </>
+              )}
+            </form>
+          </div>
+        </div>
+
+        {/* Trust Badges */}
+        <div className="border-t border-neutral-800 mt-8 pt-8">
+          <div className="flex flex-wrap justify-center gap-8 mb-8">
+            <div className="flex items-center gap-2 text-neutral-400">
+              <Shield className="w-5 h-5 text-green-500" />
+              <span className="text-sm">DSGVO-konform</span>
+            </div>
+            <div className="flex items-center gap-2 text-neutral-400">
+              <Lock className="w-5 h-5 text-blue-500" />
+              <span className="text-sm">SSL-verschlüsselt</span>
+            </div>
+            <div className="flex items-center gap-2 text-neutral-400">
+              <CreditCard className="w-5 h-5 text-purple-500" />
+              <span className="text-sm">Sichere Zahlung via Stripe</span>
+            </div>
+          </div>
+
+          {/* Payment Icons */}
+          <div className="flex justify-center gap-4 mb-8">
+            <div className="w-12 h-8 bg-neutral-800 rounded flex items-center justify-center text-xs text-neutral-400">VISA</div>
+            <div className="w-12 h-8 bg-neutral-800 rounded flex items-center justify-center text-xs text-neutral-400">MC</div>
+            <div className="w-12 h-8 bg-neutral-800 rounded flex items-center justify-center text-xs text-neutral-400">AMEX</div>
+            <div className="w-12 h-8 bg-neutral-800 rounded flex items-center justify-center text-xs text-neutral-400">TWINT</div>
+            <div className="w-12 h-8 bg-neutral-800 rounded flex items-center justify-center text-xs text-neutral-400">SEPA</div>
+          </div>
+        </div>
+
         {/* Bottom Bar */}
-        <div className="border-t border-neutral-800 mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="border-t border-neutral-800 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-sm text-neutral-500">
             {t('footer.copyright', { year: currentYear })}
           </p>

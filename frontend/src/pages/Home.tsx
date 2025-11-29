@@ -51,9 +51,22 @@ export function Home() {
   return (
     <div className="overflow-hidden">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900 text-white">
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
-        <div className="absolute inset-0 bg-gradient-to-t from-primary-900/50 to-transparent" />
+      <section className="relative bg-linear-to-br from-primary-700 via-primary-800 to-secondary-900 text-white overflow-hidden">
+        {/* Animated Flow Lines Background */}
+        <div className="absolute inset-0 opacity-10">
+          <svg className="w-full h-full" viewBox="0 0 1440 800" preserveAspectRatio="xMidYMid slice">
+            <path d="M0 400 Q360 300, 720 400 T1440 400" stroke="white" strokeWidth="2" fill="none" opacity="0.5">
+              <animate attributeName="d" dur="8s" repeatCount="indefinite" values="M0 400 Q360 300, 720 400 T1440 400;M0 400 Q360 500, 720 400 T1440 400;M0 400 Q360 300, 720 400 T1440 400"/>
+            </path>
+            <path d="M0 500 Q360 400, 720 500 T1440 500" stroke="white" strokeWidth="2" fill="none" opacity="0.3">
+              <animate attributeName="d" dur="10s" repeatCount="indefinite" values="M0 500 Q360 400, 720 500 T1440 500;M0 500 Q360 600, 720 500 T1440 500;M0 500 Q360 400, 720 500 T1440 500"/>
+            </path>
+            <path d="M0 300 Q360 200, 720 300 T1440 300" stroke="white" strokeWidth="2" fill="none" opacity="0.4">
+              <animate attributeName="d" dur="12s" repeatCount="indefinite" values="M0 300 Q360 200, 720 300 T1440 300;M0 300 Q360 400, 720 300 T1440 300;M0 300 Q360 200, 720 300 T1440 300"/>
+            </path>
+          </svg>
+        </div>
+        <div className="absolute inset-0 bg-linear-to-t from-primary-900/50 to-transparent" />
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
           <div className="text-center max-w-4xl mx-auto">
@@ -309,7 +322,7 @@ export function Home() {
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-neutral-900 mb-4">{t('home.whyUs', 'Warum DACH Marketplace?')}</h2>
+            <h2 className="text-3xl font-bold text-neutral-900 mb-4">{t('home.whyUs', 'Warum DACHFlow?')}</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[

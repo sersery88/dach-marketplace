@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <defs>
+    <!-- Gradient for the flow symbol -->
+    <linearGradient id="flowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e40af"/>
+      <stop offset="50%" style="stop-color:#2563eb"/>
+      <stop offset="100%" style="stop-color:#0d9488"/>
+    </linearGradient>
+    <!-- Gradient for accent -->
+    <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#dc2626"/>
+      <stop offset="100%" style="stop-color:#ef4444"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Logo Symbol - Stylized "D" with flow waves -->
+  <rect x="4" y="4" width="40" height="40" rx="10" fill="url(#flowGradient)"/>
+  
+  <!-- Flow waves inside - representing automation flow -->
+  <path d="M12 18 Q20 13, 28 18 T44 18" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.85"/>
+  <path d="M12 24 Q20 19, 28 24 T44 24" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M12 30 Q20 25, 28 30 T44 30" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.85"/>
+  
+  <!-- Small accent dots representing DACH countries -->
+  <circle cx="12" cy="10" r="2.5" fill="url(#accentGradient)"/>
+  <circle cx="20" cy="10" r="2.5" fill="white" opacity="0.9"/>
+  <circle cx="28" cy="10" r="2.5" fill="url(#accentGradient)"/>
+</svg>
+
