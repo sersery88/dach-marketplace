@@ -99,8 +99,8 @@ export interface Category {
   children?: Category[];
 }
 
-export interface CategoryTree {
-  category: Category;
+// CategoryTree extends Category with nested children (flattened from backend)
+export interface CategoryTree extends Category {
   children: CategoryTree[];
 }
 

@@ -5,6 +5,7 @@ export { Experts } from './Experts';
 export { ExpertProfile } from './ExpertProfile';
 export { Login } from './Login';
 export { Register } from './Register';
+export { ForgotPassword } from './ForgotPassword';
 export { ClientDashboard } from './ClientDashboard';
 export { CreatePosting } from './CreatePosting';
 export { Postings } from './Postings';

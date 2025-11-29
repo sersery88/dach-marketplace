@@ -16,6 +16,7 @@ const Experts = lazy(() => import('@/pages/Experts').then(m => ({ default: m.Exp
 const ExpertProfile = lazy(() => import('@/pages/ExpertProfile').then(m => ({ default: m.ExpertProfile })));
 const Login = lazy(() => import('@/pages/Login').then(m => ({ default: m.Login })));
 const Register = lazy(() => import('@/pages/Register').then(m => ({ default: m.Register })));
+const ForgotPassword = lazy(() => import('@/pages/ForgotPassword').then(m => ({ default: m.ForgotPassword })));
 const ClientDashboard = lazy(() => import('@/pages/ClientDashboard').then(m => ({ default: m.ClientDashboard })));
 const CreatePosting = lazy(() => import('@/pages/CreatePosting').then(m => ({ default: m.CreatePosting })));
 const Postings = lazy(() => import('@/pages/Postings').then(m => ({ default: m.Postings })));
@@ -203,6 +204,11 @@ function App() {
           <Route path="/register" element={
             <GuestRoute>
               <Register />
+            </GuestRoute>
+          } />
+          <Route path="/forgot-password" element={
+            <GuestRoute>
+              <ForgotPassword />
             </GuestRoute>
           } />
         </Routes>

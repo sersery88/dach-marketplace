@@ -88,15 +88,15 @@ export function Register() {
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <Input label="Vorname" placeholder="Max" leftIcon={<User className="w-5 h-5" />} error={errors.firstName?.message} {...register('firstName')} />
-              <Input label="Nachname" placeholder="Müller" error={errors.lastName?.message} {...register('lastName')} />
+              <Input label="Vorname" placeholder="Max" autoComplete="given-name" leftIcon={<User className="w-5 h-5" />} error={errors.firstName?.message} {...register('firstName')} />
+              <Input label="Nachname" placeholder="Müller" autoComplete="family-name" error={errors.lastName?.message} {...register('lastName')} />
             </div>
 
-            <Input label="E-Mail" type="email" placeholder="ihre@email.com" leftIcon={<Mail className="w-5 h-5" />} error={errors.email?.message} {...register('email')} />
+            <Input label="E-Mail" type="email" placeholder="ihre@email.com" autoComplete="email" leftIcon={<Mail className="w-5 h-5" />} error={errors.email?.message} {...register('email')} />
 
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1.5">Land</label>
-              <select {...register('country')} className="w-full rounded-lg border border-neutral-300 px-4 py-2.5 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20">
+              <select {...register('country')} autoComplete="country" className="w-full rounded-lg border border-neutral-300 px-4 py-2.5 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20">
                 <option value="ch">🇨🇭 Schweiz</option>
                 <option value="de">🇩🇪 Deutschland</option>
                 <option value="at">🇦🇹 Österreich</option>
@@ -107,13 +107,14 @@ export function Register() {
               label="Passwort"
               type={showPassword ? 'text' : 'password'}
               placeholder="••••••••"
+              autoComplete="new-password"
               leftIcon={<Lock className="w-5 h-5" />}
               rightIcon={<button type="button" onClick={() => setShowPassword(!showPassword)}>{showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}</button>}
               error={errors.password?.message}
               {...register('password')}
             />
 
-            <Input label="Passwort bestätigen" type="password" placeholder="••••••••" leftIcon={<Lock className="w-5 h-5" />} error={errors.confirmPassword?.message} {...register('confirmPassword')} />
+            <Input label="Passwort bestätigen" type="password" placeholder="••••••••" autoComplete="new-password" leftIcon={<Lock className="w-5 h-5" />} error={errors.confirmPassword?.message} {...register('confirmPassword')} />
 
             <label className="flex items-start gap-3 cursor-pointer">
               <input type="checkbox" {...register('acceptTerms')} className="mt-1 rounded border-neutral-300 text-primary-600 focus:ring-primary-500" />

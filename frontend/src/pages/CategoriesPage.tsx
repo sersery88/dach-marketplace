@@ -63,7 +63,8 @@ interface CategoryCardProps {
 
 function CategoryCard({ categoryTree, index }: CategoryCardProps) {
   const { t } = useTranslation();
-  const { category, children } = categoryTree;
+  // CategoryTree now extends Category directly (flattened from backend)
+  const { children = [], ...category } = categoryTree;
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}>
@@ -80,19 +81,19 @@ function CategoryCard({ categoryTree, index }: CategoryCardProps) {
           <h3 className="text-xl font-semibold text-neutral-900 mb-2">{category.nameDe || category.name}</h3>
           <p className="text-neutral-600 text-sm mb-4">{category.descriptionDe || category.description}</p>
           <div className="flex items-center text-sm text-neutral-500 mb-4">
-            <span className="font-medium text-primary-600">{category.serviceCount}</span>
+            <span className="font-medium text-primary-600">{category.serviceCount ?? 0}</span>
             <span className="ml-1">{t('categories.servicesAvailable', 'Services verfügbar')}</span>
           </div>
           {children.length > 0 && (
             <div className="space-y-2 mb-4">
               {children.slice(0, 3).map((child) => (
-                <Link key={child.category.id} to={`/categories/${child.category.slug}`}
+                <Link key={child.id} to={`/categories/${child.slug}`}
                   className="flex items-center justify-between text-sm text-neutral-600 hover:text-primary-600 transition-colors group">
                   <span className="flex items-center">
                     <ChevronRight className="w-4 h-4 mr-1 text-neutral-400 group-hover:text-primary-500" />
-                    {child.category.nameDe || child.category.name}
+                    {child.nameDe || child.name}
                   </span>
-                  <span className="text-neutral-400">{child.category.serviceCount}</span>
+                  <span className="text-neutral-400">{child.serviceCount ?? 0}</span>
                 </Link>
               ))}
             </div>
@@ -141,7 +142,7 @@ export function CategoriesPage() {
         ) : categoryTree && categoryTree.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {categoryTree.map((cat, index) => (
-              <CategoryCard key={cat.category.id} categoryTree={cat} index={index} />
+              <CategoryCard key={cat.id} categoryTree={cat} index={index} />
             ))}
           </div>
         ) : (

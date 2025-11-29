@@ -68,6 +68,7 @@ export function Login() {
               label={t('auth.email')}
               type="email"
               placeholder="ihre@email.com"
+              autoComplete="email"
               leftIcon={<Mail className="w-5 h-5" />}
               error={errors.email?.message}
               {...register('email')}
@@ -78,6 +79,7 @@ export function Login() {
                 label={t('auth.password')}
                 type={showPassword ? 'text' : 'password'}
                 placeholder="••••••••"
+                autoComplete="current-password"
                 leftIcon={<Lock className="w-5 h-5" />}
                 rightIcon={
                   <button type="button" onClick={() => setShowPassword(!showPassword)} className="focus:outline-none">
