@@ -1,10 +1,8 @@
-use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::db::Database;
 use crate::models::{
-    ExpertProfile, CreateExpertProfileRequest, UpdateExpertProfileRequest,
-    AvailabilityStatus, ExpertSearchFilters, PaginationParams,
+    ExpertProfile, CreateExpertProfileRequest, UpdateExpertProfileRequest, ExpertSearchFilters, PaginationParams,
 };
 
 pub struct ExpertService;

@@ -1,6 +1,17 @@
 // Legal pages: Terms, Privacy, Imprint, Cookies, Trust & Safety
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Shield, Building, Cookie, Lock, Briefcase, Mail } from 'lucide-react';
+import { FileText, Shield, Building, Cookie, Lock, Briefcase, Mail, Check } from 'lucide-react';
+
+const COOKIE_CONSENT_KEY = 'dach_cookie_consent';
+
+interface CookiePreferences {
+  necessary: boolean;
+  analytics: boolean;
+  marketing: boolean;
+  preferences: boolean;
+  timestamp?: string;
+}
 
 function LegalPageWrapper({ icon: Icon, title, subtitle, color, children }: {
   icon: React.ElementType;
@@ -131,6 +142,50 @@ export function Imprint() {
 }
 
 export function Cookies() {
+  const [preferences, setPreferences] = useState<CookiePreferences>({
+    necessary: true,
+    analytics: false,
+    marketing: false,
+    preferences: false,
+  });
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem(COOKIE_CONSENT_KEY);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored) as CookiePreferences;
+        setPreferences(parsed);
+      } catch {
+        // Invalid stored data, use defaults
+      }
+    }
+  }, []);
+
+  const saveConsent = (prefs: CookiePreferences) => {
+    localStorage.setItem(COOKIE_CONSENT_KEY, JSON.stringify({
+      ...prefs,
+      timestamp: new Date().toISOString(),
+    }));
+    setPreferences(prefs);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
+  };
+
+  const acceptAll = () => {
+    saveConsent({ necessary: true, analytics: true, marketing: true, preferences: true });
+  };
+
+  const rejectAll = () => {
+    saveConsent({ necessary: true, analytics: false, marketing: false, preferences: false });
+  };
+
+  const togglePreference = (key: keyof CookiePreferences) => {
+    if (key === 'necessary') return; // Can't toggle necessary
+    const newPrefs = { ...preferences, [key]: !preferences[key] };
+    saveConsent(newPrefs);
+  };
+
   return (
     <LegalPageWrapper
       icon={Cookie}
@@ -152,10 +207,60 @@ export function Cookies() {
 
       <div className="not-prose bg-neutral-100 p-6 rounded-xl mt-8">
         <p className="font-semibold text-neutral-900 mb-4">Ihre Cookie-Einstellungen</p>
-        <div className="flex flex-wrap gap-3">
-          <button className="bg-primary-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 transition">Alle akzeptieren</button>
-          <button className="bg-white text-neutral-700 px-4 py-2 rounded-lg font-medium border border-neutral-200 hover:bg-neutral-50 transition">Nur notwendige</button>
+
+        {/* Cookie toggles */}
+        <div className="space-y-3 mb-6">
+          {[
+            { key: 'necessary' as const, label: 'Notwendig', required: true },
+            { key: 'analytics' as const, label: 'Analyse', required: false },
+            { key: 'marketing' as const, label: 'Marketing', required: false },
+            { key: 'preferences' as const, label: 'Präferenzen', required: false },
+          ].map((item) => (
+            <div key={item.key} className="flex items-center justify-between bg-white p-3 rounded-lg">
+              <span className="font-medium text-neutral-700">
+                {item.label}
+                {item.required && <span className="text-xs text-neutral-500 ml-2">(Erforderlich)</span>}
+              </span>
+              <button
+                onClick={() => togglePreference(item.key)}
+                disabled={item.required}
+                className={`relative w-12 h-6 rounded-full transition-colors ${
+                  preferences[item.key] ? 'bg-primary-600' : 'bg-neutral-300'
+                } ${item.required ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+              >
+                <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                  preferences[item.key] ? 'translate-x-6' : ''
+                }`} />
+              </button>
+            </div>
+          ))}
         </div>
+
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={acceptAll}
+            className="bg-primary-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 transition"
+          >
+            Alle akzeptieren
+          </button>
+          <button
+            onClick={rejectAll}
+            className="bg-white text-neutral-700 px-4 py-2 rounded-lg font-medium border border-neutral-200 hover:bg-neutral-50 transition"
+          >
+            Nur notwendige
+          </button>
+        </div>
+
+        {saved && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-2 text-green-600 mt-4"
+          >
+            <Check className="w-4 h-4" />
+            <span className="text-sm font-medium">Einstellungen gespeichert</span>
+          </motion.div>
+        )}
       </div>
     </LegalPageWrapper>
   );

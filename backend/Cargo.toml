@@ -18,7 +18,9 @@ tower-http = { version = "0.6", features = ["cors", "trace", "compression-gzip",
 tokio = { version = "1.48", features = ["full", "tracing"] }
 
 # Database
-sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "migrate", "rust_decimal"] }
+# Using runtime-tokio + tls-native-tls for Windows compatibility (no cmake/nasm required)
+# tls-rustls uses aws-lc-rs which has complex build requirements on Windows
+sqlx = { version = "0.8", features = ["runtime-tokio", "tls-native-tls", "postgres", "uuid", "chrono", "migrate", "rust_decimal"] }
 
 # Serialization
 serde = { version = "1.0", features = ["derive"] }
@@ -26,7 +28,8 @@ serde_json = "1.0"
 serde_yaml = "0.9"
 
 # Authentication
-jsonwebtoken = { version = "10", features = ["rust_crypto"] }
+# IMPORTANT: Use rust_crypto backend to avoid aws-lc-rs (requires cmake/nasm on Windows)
+jsonwebtoken = { version = "10", default-features = false, features = ["rust_crypto"] }
 argon2 = "0.5"
 sha2 = "0.10"
 
@@ -51,7 +54,11 @@ thiserror = "2"
 anyhow = "1.0"
 
 # Search Engine (optional - only loaded if configured)
-meilisearch-sdk = { version = "0.31", optional = true }
+# Disable default features (uses aws-lc-rs for JWT and rustls for TLS)
+# Use jwt_rust_crypto instead of jwt_aws_lc_rs for Windows compatibility
+meilisearch-sdk = { version = "0.31", default-features = false, features = ["jwt_rust_crypto", "reqwest", "bytes", "pin-project-lite"], optional = true }
+# Add reqwest with native-tls for meilisearch-sdk
+reqwest = { version = "0.12", default-features = false, features = ["native-tls", "json"], optional = true }
 
 # Payments (Stripe - optional)
 async-stripe = { version = "0.41", features = ["runtime-tokio-hyper"], optional = true }
@@ -60,8 +67,9 @@ async-stripe = { version = "0.41", features = ["runtime-tokio-hyper"], optional 
 lettre = { version = "0.11", features = ["tokio1-native-tls", "builder"], optional = true }
 
 # File Storage (optional - AWS S3 compatible)
+# Using rust-s3 instead of aws-sdk-s3 for simpler dependencies (no aws-lc-rs)
 tokio-util = { version = "0.7", features = ["io"] }
-aws-sdk-s3 = { version = "1", optional = true }
+rust-s3 = { version = "0.37", default-features = false, features = ["tokio-native-tls", "with-tokio"], optional = true }
 
 # Rate Limiting
 governor = "0.10"
@@ -76,12 +84,12 @@ rust_decimal_macros = "1.37"
 
 
 [features]
-default = []
+default = ["email", "payments", "search", "storage"]
 full = ["search", "payments", "email", "storage"]
-search = ["meilisearch-sdk"]
+search = ["meilisearch-sdk", "reqwest"]
 payments = ["async-stripe"]
 email = ["lettre"]
-storage = ["aws-sdk-s3"]
+storage = ["rust-s3"]
 
 [dev-dependencies]
 tokio-test = "0.4"

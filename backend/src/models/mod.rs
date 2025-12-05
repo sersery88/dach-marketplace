@@ -25,9 +25,6 @@ pub use payment::*;
 pub use report::*;
 
 use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
-use uuid::Uuid;
-use chrono::{DateTime, Utc};
 
 /// Common pagination parameters
 #[derive(Debug, Deserialize)]
@@ -101,6 +98,16 @@ pub enum UserRole {
     Client,
     Expert,
     Admin,
+}
+
+impl std::fmt::Display for UserRole {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            UserRole::Client => write!(f, "client"),
+            UserRole::Expert => write!(f, "expert"),
+            UserRole::Admin => write!(f, "admin"),
+        }
+    }
 }
 
 /// Account status

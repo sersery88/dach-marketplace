@@ -1,6 +1,13 @@
 # Render Blueprint for DACH Marketplace
 # https://render.com/docs/blueprint-spec
 
+databases:
+  - name: dach-db
+    databaseName: dach_db
+    user: dach_db_user
+    plan: starter
+    region: frankfurt
+
 services:
   # Backend API - Rust/Axum
   - type: web
@@ -13,7 +20,9 @@ services:
     healthCheckPath: /api/v1/health
     envVars:
       - key: DATABASE_URL
-        sync: false  # Set to your Supabase connection string
+        fromDatabase:
+          name: dach-db
+          property: connectionString
       - key: JWT_SECRET
         sync: false  # Must be at least 32 characters! Generate with: openssl rand -base64 32
       - key: RUST_LOG

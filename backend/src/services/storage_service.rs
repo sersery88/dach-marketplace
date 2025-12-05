@@ -1,49 +1,51 @@
-//! Storage service using AWS S3 or compatible storage
+//! Storage service using AWS S3 or compatible storage (via rust-s3)
 //! This module is only compiled when the "storage" feature is enabled.
 
 #[cfg(feature = "storage")]
-use aws_sdk_s3::{
-    config::{Credentials, Region},
-    primitives::ByteStream,
-    Client,
-};
+use s3::{Bucket, Region};
+#[cfg(feature = "storage")]
+use s3::creds::Credentials;
+#[cfg(feature = "storage")]
+use s3::error::S3Error;
 
 #[cfg(feature = "storage")]
 use uuid::Uuid;
 
 #[cfg(feature = "storage")]
 pub struct StorageService {
-    client: Client,
-    bucket: String,
+    bucket: Box<Bucket>,
 }
 
 #[cfg(feature = "storage")]
 impl StorageService {
     /// Create new storage service
-    pub async fn new(
-        bucket: &str,
+    pub fn new(
+        bucket_name: &str,
         region: &str,
         access_key: &str,
         secret_key: &str,
         endpoint: Option<&str>,
-    ) -> Self {
-        let credentials = Credentials::new(access_key, secret_key, None, None, "static");
+    ) -> Result<Self, S3Error> {
+        let region = if let Some(ep) = endpoint {
+            Region::Custom {
+                region: region.to_string(),
+                endpoint: ep.to_string(),
+            }
+        } else {
+            region.parse().unwrap_or(Region::UsEast1)
+        };
 
-        let mut config_builder = aws_sdk_s3::Config::builder()
-            .region(Region::new(region.to_string()))
-            .credentials_provider(credentials);
+        let credentials = Credentials::new(
+            Some(access_key),
+            Some(secret_key),
+            None,
+            None,
+            None,
+        )?;
 
-        if let Some(ep) = endpoint {
-            config_builder = config_builder.endpoint_url(ep);
-        }
+        let bucket = Bucket::new(bucket_name, region, credentials)?;
 
-        let config = config_builder.build();
-        let client = Client::from_conf(config);
-
-        Self {
-            client,
-            bucket: bucket.to_string(),
-        }
+        Ok(Self { bucket })
     }
 
     /// Upload a file
@@ -53,7 +55,7 @@ impl StorageService {
         content_type: &str,
         folder: &str,
         original_filename: &str,
-    ) -> Result<String, aws_sdk_s3::Error> {
+    ) -> Result<String, S3Error> {
         let extension = original_filename
             .rsplit('.')
             .next()
@@ -61,27 +63,24 @@ impl StorageService {
 
         let key = format!("{}/{}.{}", folder, Uuid::new_v4(), extension);
 
-        self.client
-            .put_object()
-            .bucket(&self.bucket)
-            .key(&key)
-            .body(ByteStream::from(data))
-            .content_type(content_type)
-            .send()
+        self.bucket
+            .put_object_with_content_type(&key, &data, content_type)
             .await?;
 
-        Ok(format!("https://{}.s3.amazonaws.com/{}", self.bucket, key))
+        // Return the public URL
+        let bucket_name = self.bucket.name();
+        let region = self.bucket.region();
+        let url = match region {
+            Region::Custom { endpoint, .. } => format!("{}/{}/{}", endpoint, bucket_name, key),
+            _ => format!("https://{}.s3.{}.amazonaws.com/{}", bucket_name, region, key),
+        };
+
+        Ok(url)
     }
 
     /// Delete a file
-    pub async fn delete_file(&self, key: &str) -> Result<(), aws_sdk_s3::Error> {
-        self.client
-            .delete_object()
-            .bucket(&self.bucket)
-            .key(key)
-            .send()
-            .await?;
-
+    pub async fn delete_file(&self, key: &str) -> Result<(), S3Error> {
+        self.bucket.delete_object(key).await?;
         Ok(())
     }
 
@@ -91,14 +90,13 @@ impl StorageService {
         folder: &str,
         filename: &str,
         _content_type: &str,
-        _expires_in_secs: u64,
-    ) -> Result<String, aws_sdk_s3::Error> {
+        expires_in_secs: u64,
+    ) -> Result<String, S3Error> {
         let extension = filename.rsplit('.').next().unwrap_or("bin");
         let key = format!("{}/{}.{}", folder, Uuid::new_v4(), extension);
 
-        // Note: Presigned URLs require additional setup with aws-sdk-s3
-        // This is a simplified version
-        Ok(format!("https://{}.s3.amazonaws.com/{}", self.bucket, key))
+        let url = self.bucket.presign_put(&key, expires_in_secs as u32, None, None).await?;
+        Ok(url)
     }
 
     /// Upload avatar
@@ -107,7 +105,7 @@ impl StorageService {
         user_id: Uuid,
         data: Vec<u8>,
         content_type: &str,
-    ) -> Result<String, aws_sdk_s3::Error> {
+    ) -> Result<String, S3Error> {
         self.upload_file(data, content_type, "avatars", &format!("{}.jpg", user_id)).await
     }
 
@@ -118,7 +116,7 @@ impl StorageService {
         data: Vec<u8>,
         content_type: &str,
         filename: &str,
-    ) -> Result<String, aws_sdk_s3::Error> {
+    ) -> Result<String, S3Error> {
         self.upload_file(data, content_type, &format!("portfolio/{}", expert_id), filename).await
     }
 
@@ -129,7 +127,7 @@ impl StorageService {
         data: Vec<u8>,
         content_type: &str,
         filename: &str,
-    ) -> Result<String, aws_sdk_s3::Error> {
+    ) -> Result<String, S3Error> {
         self.upload_file(data, content_type, &format!("services/{}", service_id), filename).await
     }
 
@@ -140,7 +138,7 @@ impl StorageService {
         data: Vec<u8>,
         content_type: &str,
         filename: &str,
-    ) -> Result<String, aws_sdk_s3::Error> {
+    ) -> Result<String, S3Error> {
         self.upload_file(data, content_type, &format!("deliverables/{}", project_id), filename).await
     }
 }

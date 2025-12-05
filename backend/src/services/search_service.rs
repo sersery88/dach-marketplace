@@ -138,7 +138,7 @@ impl SearchService {
             .index("experts")
             .search()
             .with_query(query)
-            .with_offset((page - 1) * per_page)
+            .with_offset(((page - 1) * per_page) as usize)
             .with_limit(per_page as usize)
             .execute::<ExpertSearchDocument>()
             .await?;
@@ -157,7 +157,7 @@ impl SearchService {
             .index("services")
             .search()
             .with_query(query)
-            .with_offset((page - 1) * per_page)
+            .with_offset(((page - 1) * per_page) as usize)
             .with_limit(per_page as usize)
             .execute::<ServiceSearchDocument>()
             .await?;

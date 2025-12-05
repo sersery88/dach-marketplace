@@ -7,7 +7,7 @@ use uuid::Uuid;
 use crate::AppState;
 use crate::models::{
     Category, CreateCategoryRequest, AccountStatus,
-    PaginationParams, PaginatedResponse, PaginationMeta,
+    PaginationParams, PaginatedResponse,
     ContentReport, ContentReportWithDetails, ResolveReportRequest, ReportFilters,
 };
 use crate::services::{AdminService, AdminStats as ServiceAdminStats, UserRow, CategoryService, PendingExpert, ReportService, PlatformAnalytics};

@@ -4,9 +4,9 @@ use uuid::Uuid;
 use crate::models::{
     ClientProfile, CreateClientProfileRequest, UpdateClientProfileRequest,
     ProjectPosting, CreateProjectPostingRequest, UpdateProjectPostingRequest,
-    ProjectPostingFilters, ProjectPostingStatus, PaginatedResponse, PaginationMeta,
+    ProjectPostingFilters, PaginatedResponse, PaginationMeta,
     BookingRequest, CreateBookingRequest, RespondBookingRequest, BookingStatus,
-    Proposal, CreateProposalRequest, ProposalStatus,
+    Proposal, CreateProposalRequest,
 };
 
 pub struct ClientService;

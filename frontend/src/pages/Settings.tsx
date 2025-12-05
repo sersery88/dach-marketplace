@@ -1,13 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import {
   User, Lock, Bell, CreditCard, Shield, Trash2,
-  Camera, Save, Eye, EyeOff, Check, Loader2
+  Camera, Save, Eye, EyeOff, Check, Loader2, AlertCircle
 } from 'lucide-react';
 import { Button, Card, CardHeader, CardTitle, CardContent, Input } from '@/components/ui';
 import { useAuthStore } from '@/stores/authStore';
 import { cn } from '@/lib/utils';
+import {
+  useUpdateProfile,
+  useChangePassword,
+  useNotificationPreferences,
+  useUpdateNotifications,
+  useUploadAvatar,
+} from '@/hooks/useUser';
 
 type SettingsTab = 'profile' | 'security' | 'notifications' | 'billing' | 'privacy';
 
@@ -15,8 +22,13 @@ export function Settings() {
   useTranslation(); // For future i18n
   const { user } = useAuthStore();
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // API hooks
+  const updateProfile = useUpdateProfile();
+  const changePassword = useChangePassword();
+  const { data: notificationPrefs } = useNotificationPreferences();
+  const updateNotifications = useUpdateNotifications();
+  const uploadAvatar = useUploadAvatar();
 
   // Profile form state
   const [profileData, setProfileData] = useState({
@@ -35,8 +47,10 @@ export function Settings() {
     confirmPassword: '',
   });
   const [showPasswords, setShowPasswords] = useState({ current: false, new: false, confirm: false });
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
 
-  // Notification preferences
+  // Notification preferences - sync with API data
   const [notifications, setNotifications] = useState({
     emailMessages: true,
     emailProjects: true,
@@ -44,6 +58,13 @@ export function Settings() {
     pushMessages: true,
     pushProjects: true,
   });
+
+  // Sync notification prefs when loaded from API
+  useEffect(() => {
+    if (notificationPrefs) {
+      setNotifications(notificationPrefs);
+    }
+  }, [notificationPrefs]);
 
   const tabs = [
     { key: 'profile' as const, label: 'Profil', icon: User },
@@ -53,13 +74,65 @@ export function Settings() {
     { key: 'privacy' as const, label: 'Datenschutz', icon: Shield },
   ];
 
-  const handleSave = async () => {
-    setIsSaving(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsSaving(false);
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 3000);
+  // Profile save handler
+  const handleSaveProfile = async () => {
+    if (!user?.id) return;
+    try {
+      await updateProfile.mutateAsync({
+        userId: user.id,
+        data: {
+          firstName: profileData.firstName,
+          lastName: profileData.lastName,
+          phone: profileData.phone || undefined,
+        },
+      });
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+    }
+  };
+
+  // Password change handler
+  const handleChangePassword = async () => {
+    setPasswordError(null);
+    setPasswordSuccess(false);
+
+    if (securityData.newPassword !== securityData.confirmPassword) {
+      setPasswordError('Passwörter stimmen nicht überein');
+      return;
+    }
+
+    try {
+      await changePassword.mutateAsync({
+        currentPassword: securityData.currentPassword,
+        newPassword: securityData.newPassword,
+      });
+      setPasswordSuccess(true);
+      setSecurityData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setTimeout(() => setPasswordSuccess(false), 3000);
+    } catch (error: unknown) {
+      const err = error as { message?: string };
+      setPasswordError(err.message || 'Passwort konnte nicht geändert werden');
+    }
+  };
+
+  // Notifications save handler
+  const handleSaveNotifications = async () => {
+    try {
+      await updateNotifications.mutateAsync(notifications);
+    } catch (error) {
+      console.error('Failed to update notifications:', error);
+    }
+  };
+
+  // Avatar upload handler
+  const handleAvatarUpload = async (file: File) => {
+    if (!user?.id) return;
+    try {
+      const url = await uploadAvatar.mutateAsync({ userId: user.id, file });
+      setProfileData(prev => ({ ...prev, avatarUrl: url }));
+    } catch (error) {
+      console.error('Failed to upload avatar:', error);
+    }
   };
 
   return (
@@ -113,9 +186,11 @@ export function Settings() {
               <ProfileTab
                 data={profileData}
                 onChange={setProfileData}
-                onSave={handleSave}
-                isSaving={isSaving}
-                saveSuccess={saveSuccess}
+                onSave={handleSaveProfile}
+                onAvatarUpload={handleAvatarUpload}
+                isSaving={updateProfile.isPending}
+                isUploadingAvatar={uploadAvatar.isPending}
+                saveSuccess={updateProfile.isSuccess}
               />
             )}
             {activeTab === 'security' && (
@@ -124,16 +199,19 @@ export function Settings() {
                 onChange={setSecurityData}
                 showPasswords={showPasswords}
                 setShowPasswords={setShowPasswords}
-                onSave={handleSave}
-                isSaving={isSaving}
+                onSave={handleChangePassword}
+                isSaving={changePassword.isPending}
+                error={passwordError}
+                success={passwordSuccess}
               />
             )}
             {activeTab === 'notifications' && (
               <NotificationsTab
                 data={notifications}
                 onChange={setNotifications}
-                onSave={handleSave}
-                isSaving={isSaving}
+                onSave={handleSaveNotifications}
+                isSaving={updateNotifications.isPending}
+                saveSuccess={updateNotifications.isSuccess}
               />
             )}
             {activeTab === 'billing' && <BillingTab />}
@@ -149,13 +227,24 @@ export function Settings() {
 type ProfileData = { firstName: string; lastName: string; email: string; phone: string; bio: string; avatarUrl: string };
 
 // Profile Tab Component
-function ProfileTab({ data, onChange, onSave, isSaving, saveSuccess }: {
+function ProfileTab({ data, onChange, onSave, onAvatarUpload, isSaving, isUploadingAvatar, saveSuccess }: {
   data: ProfileData;
   onChange: (data: ProfileData) => void;
   onSave: () => void;
+  onAvatarUpload: (file: File) => void;
   isSaving: boolean;
+  isUploadingAvatar: boolean;
   saveSuccess: boolean;
 }) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      onAvatarUpload(file);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -166,7 +255,9 @@ function ProfileTab({ data, onChange, onSave, isSaving, saveSuccess }: {
         <div className="flex items-center gap-6">
           <div className="relative">
             <div className="w-24 h-24 rounded-full bg-primary-100 flex items-center justify-center overflow-hidden">
-              {data.avatarUrl ? (
+              {isUploadingAvatar ? (
+                <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+              ) : data.avatarUrl ? (
                 <img src={data.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
                 <span className="text-3xl font-bold text-primary-600">
@@ -174,7 +265,18 @@ function ProfileTab({ data, onChange, onSave, isSaving, saveSuccess }: {
                 </span>
               )}
             </div>
-            <button className="absolute bottom-0 right-0 p-2 bg-primary-600 text-white rounded-full hover:bg-primary-700 transition">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploadingAvatar}
+              className="absolute bottom-0 right-0 p-2 bg-primary-600 text-white rounded-full hover:bg-primary-700 transition disabled:opacity-50"
+            >
               <Camera className="w-4 h-4" />
             </button>
           </div>
@@ -202,14 +304,16 @@ function ProfileTab({ data, onChange, onSave, isSaving, saveSuccess }: {
           </div>
         </div>
 
-        {/* Email */}
+        {/* Email - read only */}
         <div>
           <label className="block text-sm font-medium text-neutral-700 mb-1">E-Mail</label>
           <Input
             type="email"
             value={data.email}
-            onChange={(e) => onChange({ ...data, email: e.target.value })}
+            disabled
+            className="bg-neutral-50"
           />
+          <p className="text-xs text-neutral-500 mt-1">E-Mail kann nicht geändert werden</p>
         </div>
 
         {/* Phone */}
@@ -262,13 +366,15 @@ type SecurityData = { currentPassword: string; newPassword: string; confirmPassw
 type ShowPasswordsState = { current: boolean; new: boolean; confirm: boolean };
 
 // Security Tab Component
-function SecurityTab({ data, onChange, showPasswords, setShowPasswords, onSave, isSaving }: {
+function SecurityTab({ data, onChange, showPasswords, setShowPasswords, onSave, isSaving, error, success }: {
   data: SecurityData;
   onChange: (data: SecurityData) => void;
   showPasswords: ShowPasswordsState;
   setShowPasswords: (data: ShowPasswordsState) => void;
   onSave: () => void;
   isSaving: boolean;
+  error: string | null;
+  success: boolean;
 }) {
   const passwordStrength = (password: string) => {
     let strength = 0;
@@ -357,6 +463,24 @@ function SecurityTab({ data, onChange, showPasswords, setShowPasswords, onSave, 
             )}
           </div>
 
+          {error && (
+            <div className="flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded-lg">
+              <AlertCircle className="w-4 h-4" />
+              <span className="text-sm">{error}</span>
+            </div>
+          )}
+
+          {success && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded-lg"
+            >
+              <Check className="w-4 h-4" />
+              <span className="text-sm">Passwort erfolgreich geändert</span>
+            </motion.div>
+          )}
+
           <Button onClick={onSave} disabled={isSaving || !data.currentPassword || !data.newPassword || data.newPassword !== data.confirmPassword}>
             {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Lock className="w-4 h-4 mr-2" />}
             Passwort ändern
@@ -387,11 +511,12 @@ function SecurityTab({ data, onChange, showPasswords, setShowPasswords, onSave, 
 type NotificationsData = { emailMessages: boolean; emailProjects: boolean; emailMarketing: boolean; pushMessages: boolean; pushProjects: boolean };
 
 // Notifications Tab Component
-function NotificationsTab({ data, onChange, onSave, isSaving }: {
+function NotificationsTab({ data, onChange, onSave, isSaving, saveSuccess }: {
   data: NotificationsData;
   onChange: (data: NotificationsData) => void;
   onSave: () => void;
   isSaving: boolean;
+  saveSuccess?: boolean;
 }) {
   const Toggle = ({ checked, onChange: onToggle }: { checked: boolean; onChange: (v: boolean) => void }) => (
     <button
@@ -461,8 +586,18 @@ function NotificationsTab({ data, onChange, onSave, isSaving }: {
           </div>
         </div>
 
-        <div className="pt-4 border-t border-neutral-100">
-          <Button onClick={onSave} disabled={isSaving}>
+        <div className="flex items-center justify-between pt-4 border-t border-neutral-100">
+          {saveSuccess && (
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex items-center gap-2 text-green-600"
+            >
+              <Check className="w-4 h-4" />
+              <span className="text-sm">Einstellungen gespeichert</span>
+            </motion.div>
+          )}
+          <Button onClick={onSave} disabled={isSaving} className="ml-auto">
             {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
             Speichern
           </Button>

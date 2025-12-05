@@ -3,7 +3,7 @@
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::models::{User, AccountStatus, PaginationMeta};
+use crate::models::{AccountStatus, PaginationMeta};
 
 pub struct AdminService;
 

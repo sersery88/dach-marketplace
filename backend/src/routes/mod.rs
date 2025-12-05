@@ -80,6 +80,9 @@ fn user_routes() -> Router<AppState> {
         .route("/{id}", get(handlers::users::get_user))
         .route("/{id}", put(handlers::users::update_user))
         .route("/{id}/avatar", post(handlers::users::upload_avatar))
+        .route("/me/password", post(handlers::users::change_password))
+        .route("/me/notifications", get(handlers::users::get_notifications))
+        .route("/me/notifications", put(handlers::users::update_notifications))
 }
 
 fn expert_routes() -> Router<AppState> {
