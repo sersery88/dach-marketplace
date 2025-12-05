@@ -100,15 +100,15 @@ impl IntoResponse for ApiError {
                 "validation_error",
                 msg.clone(),
             ),
-            ApiError::Internal(_) => (
+            ApiError::Internal(err) => (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "internal_error",
-                "An internal error occurred".to_string(),
+                format!("An internal error occurred: {}", err),
             ),
-            ApiError::Database(_) => (
+            ApiError::Database(err) => (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "database_error",
-                "A database error occurred".to_string(),
+                format!("A database error occurred: {}", err),
             ),
         };
 
