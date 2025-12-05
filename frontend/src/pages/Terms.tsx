@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Card } from '@/components/ui';
 
 export function Terms() {
-    const { t } = useTranslation();
+    // const { t } = useTranslation();
 
     return (
         <div className="min-h-screen bg-neutral-50 py-12">

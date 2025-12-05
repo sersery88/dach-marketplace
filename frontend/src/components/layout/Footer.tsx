@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Linkedin, Twitter, Github, Mail, Send, CheckCircle, Shield, CreditCard, Lock } from 'lucide-react';
 import { Logo } from '@/components/brand';
 import { Button } from '@/components/ui';
+import { client } from '@/api/client'; // Import client
 
 export function Footer() {
   const { t } = useTranslation();
@@ -11,12 +12,19 @@ export function Footer() {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
 
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
+  import { client } from '@/api/client';
+
+  // ... inside component
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (email) {
-      // TODO: Implement newsletter subscription
-      setSubscribed(true);
-      setEmail('');
+      try {
+        await client.post('/newsletter/subscribe', { email });
+        setSubscribed(true);
+        setEmail('');
+      } catch (error) {
+        console.error('Newsletter subscription failed:', error);
+      }
     }
   };
 

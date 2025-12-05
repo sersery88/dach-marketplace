@@ -1,30 +1,44 @@
-pub mod health;
+pub mod admin;
 pub mod auth;
-pub mod users;
-pub mod experts;
-pub mod services;
 pub mod categories;
-pub mod projects;
+pub mod clients;
+pub mod experts;
+pub mod health;
 pub mod messages;
+pub mod newsletter;
+pub mod payments;
+pub mod projects;
+pub mod reports;
 pub mod reviews;
 pub mod search;
-pub mod admin;
-pub mod clients;
-pub mod payments;
-pub mod reports;
+pub mod services;
+pub mod users;
 
 pub mod common {
-    pub use super::{ApiError, SuccessResponse as ApiResponse, EmptyResponse};
+    pub use super::{ApiError, EmptyResponse, SuccessResponse as ApiResponse};
 
     impl ApiError {
-        pub fn not_found(msg: &str) -> Self { ApiError::NotFound(msg.to_string()) }
-        pub fn validation(msg: String) -> Self { ApiError::Validation(msg) }
-        pub fn internal(msg: String) -> Self { ApiError::Internal(anyhow::anyhow!(msg)) }
-        pub fn unauthorized(msg: &str) -> Self { ApiError::Unauthorized(msg.to_string()) }
+        pub fn not_found(msg: &str) -> Self {
+            ApiError::NotFound(msg.to_string())
+        }
+        pub fn validation(msg: String) -> Self {
+            ApiError::Validation(msg)
+        }
+        pub fn internal(msg: String) -> Self {
+            ApiError::Internal(anyhow::anyhow!(msg))
+        }
+        pub fn unauthorized(msg: &str) -> Self {
+            ApiError::Unauthorized(msg.to_string())
+        }
     }
 
     impl<T: serde::Serialize> ApiResponse<T> {
-        pub fn success(data: T) -> Self { Self { success: true, data } }
+        pub fn success(data: T) -> Self {
+            Self {
+                success: true,
+                data,
+            }
+        }
     }
 }
 
@@ -41,25 +55,25 @@ use thiserror::Error;
 pub enum ApiError {
     #[error("Not found: {0}")]
     NotFound(String),
-    
+
     #[error("Bad request: {0}")]
     BadRequest(String),
-    
+
     #[error("Unauthorized: {0}")]
     Unauthorized(String),
-    
+
     #[error("Forbidden: {0}")]
     Forbidden(String),
-    
+
     #[error("Conflict: {0}")]
     Conflict(String),
-    
+
     #[error("Validation error: {0}")]
     Validation(String),
-    
+
     #[error("Internal server error")]
     Internal(#[from] anyhow::Error),
-    
+
     #[error("Database error")]
     Database(#[from] sqlx::Error),
 }
@@ -81,9 +95,21 @@ impl IntoResponse for ApiError {
             ApiError::Unauthorized(msg) => (StatusCode::UNAUTHORIZED, "unauthorized", msg.clone()),
             ApiError::Forbidden(msg) => (StatusCode::FORBIDDEN, "forbidden", msg.clone()),
             ApiError::Conflict(msg) => (StatusCode::CONFLICT, "conflict", msg.clone()),
-            ApiError::Validation(msg) => (StatusCode::UNPROCESSABLE_ENTITY, "validation_error", msg.clone()),
-            ApiError::Internal(_) => (StatusCode::INTERNAL_SERVER_ERROR, "internal_error", "An internal error occurred".to_string()),
-            ApiError::Database(_) => (StatusCode::INTERNAL_SERVER_ERROR, "database_error", "A database error occurred".to_string()),
+            ApiError::Validation(msg) => (
+                StatusCode::UNPROCESSABLE_ENTITY,
+                "validation_error",
+                msg.clone(),
+            ),
+            ApiError::Internal(_) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "internal_error",
+                "An internal error occurred".to_string(),
+            ),
+            ApiError::Database(_) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "database_error",
+                "A database error occurred".to_string(),
+            ),
         };
 
         let body = Json(ErrorResponse {
@@ -105,7 +131,10 @@ pub struct SuccessResponse<T: Serialize> {
 
 impl<T: Serialize> SuccessResponse<T> {
     pub fn new(data: T) -> Self {
-        Self { success: true, data }
+        Self {
+            success: true,
+            data,
+        }
     }
 }
 
@@ -126,4 +155,3 @@ impl EmptyResponse {
 }
 
 pub type ApiResult<T> = Result<Json<SuccessResponse<T>>, ApiError>;
-

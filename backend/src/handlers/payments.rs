@@ -785,6 +785,30 @@ pub async fn stripe_webhook(
                                 "Payment recorded: {} {} from {} to {}",
                                 amount, currency, buyer_uuid, expert_uuid
                             );
+
+                            // Send order confirmation email
+                            #[cfg(feature = "email")]
+                            if let Some(email_service) = &state.email {
+                                // Get buyer email
+                                if let Ok(Some((buyer_email,))) = sqlx::query_as::<_, (String,)>(
+                                    "SELECT email FROM users WHERE id = $1"
+                                )
+                                .bind(buyer_uuid)
+                                .fetch_optional(state.db.pool())
+                                .await {
+                                    let service_name = metadata.get("service_title")
+                                        .cloned()
+                                        .unwrap_or_else(|| "Dienstleistung".to_string());
+                                    
+                                    let _ = email_service.send_order_confirmation(
+                                        &buyer_email,
+                                        amount,
+                                        &currency,
+                                        &service_name,
+                                        &session.id.to_string(),
+                                    ).await;
+                                }
+                            }
                         }
                     }
                 }

@@ -139,5 +139,58 @@ impl EmailService {
 
         self.send_email(to, &format!("Projekt-Update: {}", project_title), &html).await
     }
+
+    /// Send newsletter welcome email
+    pub async fn send_newsletter_welcome(
+        &self,
+        to: &str,
+    ) -> Result<(), lettre::transport::smtp::Error> {
+        let html = r#"
+            <h1>Willkommen beim DACH Marketplace Newsletter!</h1>
+            <p>Vielen Dank für Ihre Anmeldung.</p>
+            <p>Wir informieren Sie ab sofort über:</p>
+            <ul>
+                <li>Neue Top-Experten</li>
+                <li>Aktuelle Marktplatz-Trends</li>
+                <li>Exklusive Angebote</li>
+            </ul>
+            <p>Bis bald,<br>Ihr DACH Marketplace Team</p>
+            "#;
+
+        self.send_email(to, "Willkommen im Newsletter", html).await
+    }
+
+    /// Send order confirmation email
+    pub async fn send_order_confirmation(
+        &self,
+        to: &str,
+        amount: i32,
+        currency: &str,
+        service_name: &str,
+        order_id: &str,
+    ) -> Result<(), lettre::transport::smtp::Error> {
+        let amount_formatted = format!("{:.2} {}", amount as f64 / 100.0, currency.to_uppercase());
+        
+        let html = format!(
+            r#"
+            <h1>Bestellbestätigung</h1>
+            <p>Vielen Dank für Ihren Auftrag!</p>
+            <p>Wir haben Ihre Zahlung erhalten und den Experten verständigt.</p>
+            
+            <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <p><strong>Dienstleistung:</strong> {service_name}</p>
+                <p><strong>Betrag:</strong> {amount_formatted}</p>
+                <p><strong>Bestellnummer:</strong> {order_id}</p>
+            </div>
+
+            <p>Der Experte wird sich in Kürze mit Ihnen in Verbindung setzen, um die Details zu klären.</p>
+            <p><a href="https://dach-marketplace.com/dashboard/bookings">Zu meinen Buchungen</a></p>
+            
+            <p>Mit freundlichen Grüßen,<br>Das DACH Marketplace Team</p>
+            "#
+        );
+
+        self.send_email(to, &format!("Bestätigung Ihrer Bestellung: {}", service_name), &html).await
+    }
 }
 
