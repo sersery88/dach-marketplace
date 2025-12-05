@@ -44,7 +44,19 @@ async fn main() -> anyhow::Result<()> {
     tracing::info!("🚀 Starting DACH Marketplace API v0.1.1...");
 
     // Load configuration from environment
-    let settings = Settings::from_env().map_err(|e| anyhow::anyhow!(e))?;
+    let mut settings = Settings::from_env().map_err(|e| anyhow::anyhow!(e))?;
+
+    // Enforce SSL mode for production database connections (Render requires this)
+    if settings.server.environment == "production" {
+        if !settings.database.url.contains("sslmode=") {
+            if settings.database.url.contains('?') {
+                settings.database.url.push_str("&sslmode=require");
+            } else {
+                settings.database.url.push_str("?sslmode=require");
+            }
+            tracing::info!("🔒 Enforced SSL mode for production database connection");
+        }
+    }
 
     tracing::info!("✅ Configuration loaded");
     tracing::info!("   Environment: {}", settings.server.environment);

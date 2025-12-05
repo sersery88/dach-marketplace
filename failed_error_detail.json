@@ -1,0 +1,44 @@
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Host dach-marketplace-api.onrender.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 216.24.57.251, 216.24.57.7
+*   Trying 216.24.57.251:443...
+* schannel: disabled automatic use of client certificate
+* Connected to dach-marketplace-api.onrender.com (216.24.57.251) port 443
+* using HTTP/1.x
+> GET /api/v1/services HTTP/1.1
+> Host: dach-marketplace-api.onrender.com
+> User-Agent: curl/8.12.1
+> Accept: */*
+> 
+* Request completely sent off
+* schannel: remote party requests renegotiation
+* schannel: renegotiating SSL/TLS connection
+* schannel: SSL/TLS connection renegotiated
+< HTTP/1.1 500 Internal Server Error
+< Date: Fri, 05 Dec 2025 20:00:50 GMT
+< Content-Type: application/json
+< Transfer-Encoding: chunked
+< Connection: keep-alive
+< CF-RAY: 9a9621cb59aea43d-ZRH
+< access-control-allow-credentials: true
+< content-security-policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'
+< permissions-policy: camera=(), microphone=(), geolocation=(), payment=()
+< referrer-policy: strict-origin-when-cross-origin
+< rndr-id: 4b701856-802f-4714
+< strict-transport-security: max-age=31536000; includeSubDomains
+< vary: origin, access-control-request-method, access-control-request-headers
+< vary: Accept-Encoding
+< x-content-type-options: nosniff
+< x-frame-options: DENY
+< x-render-origin-server: Render
+< x-request-id: 306697cf-c8e0-4b49-a1fc-2e1824fb96dc
+< x-xss-protection: 1; mode=block
+< cf-cache-status: DYNAMIC
+< Server: cloudflare
+< alt-svc: h3=":443"; ma=86400
+< 
+{ [76 bytes data]
+100    65    0    65    0     0    554      0 --:--:-- --:--:-- --:--:--   565{"error":"internal_error","message":"An internal error occurred"}
+* Connection #0 to host dach-marketplace-api.onrender.com left intact

@@ -1,0 +1,44 @@
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Host dach-marketplace-api.onrender.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 216.24.57.251, 216.24.57.7
+*   Trying 216.24.57.251:443...
+* schannel: disabled automatic use of client certificate
+* Connected to dach-marketplace-api.onrender.com (216.24.57.251) port 443
+* using HTTP/1.x
+> GET /api/v1/health HTTP/1.1
+> Host: dach-marketplace-api.onrender.com
+> User-Agent: curl/8.12.1
+> Accept: */*
+> 
+* Request completely sent off
+* schannel: remote party requests renegotiation
+* schannel: renegotiating SSL/TLS connection
+* schannel: SSL/TLS connection renegotiated
+< HTTP/1.1 200 OK
+< Date: Fri, 05 Dec 2025 20:02:45 GMT
+< Content-Type: application/json
+< Transfer-Encoding: chunked
+< Connection: keep-alive
+< CF-RAY: 9a962499fe7c0d25-ZRH
+< access-control-allow-credentials: true
+< content-security-policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'
+< permissions-policy: camera=(), microphone=(), geolocation=(), payment=()
+< referrer-policy: strict-origin-when-cross-origin
+< rndr-id: ab350604-3733-47b2
+< strict-transport-security: max-age=31536000; includeSubDomains
+< vary: origin, access-control-request-method, access-control-request-headers
+< vary: Accept-Encoding
+< x-content-type-options: nosniff
+< x-frame-options: DENY
+< x-render-origin-server: Render
+< x-request-id: 351fff11-61ae-4186-a4ed-dacbdd6deac4
+< x-xss-protection: 1; mode=block
+< cf-cache-status: DYNAMIC
+< Server: cloudflare
+< alt-svc: h3=":443"; ma=86400
+< 
+{ [117 bytes data]
+100   106    0   106    0     0    715      0 --:--:-- --:--:-- --:--:--   726{"status":"degraded","version":"0.1.0","database":false,"timestamp":"2025-12-05T20:02:45.494540260+00:00"}
+* Connection #0 to host dach-marketplace-api.onrender.com left intact
