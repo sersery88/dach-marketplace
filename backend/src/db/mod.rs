@@ -67,11 +67,22 @@ impl Database {
             }
         }
 
-        Err(anyhow::anyhow!(
-            "Failed to connect to database after {} attempts. Last error: {}",
+        // If all attempts fail, fallback to lazy connection to allow app to start
+        // This enables debugging via /health and /services endpoints
+        tracing::error!(
+            "Failed to connect to database after {} attempts. Last error: {}. Falling back to lazy connection.",
             max_retries,
             last_error.map(|e| e.to_string()).unwrap_or_else(|| "Unknown".to_string())
-        ))
+        );
+
+        let lazy_pool = PgPoolOptions::new()
+            .max_connections(10)
+            .min_connections(1)
+            .acquire_timeout(std::time::Duration::from_secs(30))
+            .idle_timeout(std::time::Duration::from_secs(600))
+            .connect_lazy_with(connect_options);
+            
+        Ok(Self { pool: lazy_pool })
     }
 
     /// Run database migrations

@@ -75,8 +75,10 @@ async fn main() -> anyhow::Result<()> {
 
     // Run migrations (skip if SKIP_MIGRATIONS=true, useful for PgBouncer/Supavisor)
     if std::env::var("SKIP_MIGRATIONS").unwrap_or_default() != "true" {
-        db.run_migrations().await?;
-        tracing::info!("✅ Migrations completed");
+        match db.run_migrations().await {
+            Ok(_) => tracing::info!("✅ Migrations completed"),
+            Err(e) => tracing::error!("❌ Migrations failed: {}", e),
+        }
     } else {
         tracing::info!("⏭️ Migrations skipped (SKIP_MIGRATIONS=true)");
     }
