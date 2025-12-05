@@ -1,3 +1,4 @@
+// v0.1.3 - Guaranteed startup: bind port FIRST, then initialize
 use tokio::net::TcpListener;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, fmt};
 use axum::{Router, Json, routing::get};
