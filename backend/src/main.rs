@@ -68,6 +68,20 @@ async fn main() -> anyhow::Result<()> {
 
     tracing::info!("🚀 Starting DACH Marketplace API v{}...", env!("CARGO_PKG_VERSION"));
 
+    // Debug: Log key environment variables to diagnose issues
+    tracing::info!("🔍 Diagnosing environment variables:");
+    tracing::info!("   DATABASE_URL set: {}", std::env::var("DATABASE_URL").is_ok());
+    tracing::info!("   JWT_SECRET set: {}", std::env::var("JWT_SECRET").is_ok());
+    tracing::info!("   ENVIRONMENT: {:?}", std::env::var("ENVIRONMENT").ok());
+    tracing::info!("   PORT: {:?}", std::env::var("PORT").ok());
+    
+    // List ALL env vars starting with DATABASE, DB, POSTGRES (safe to log keys only)
+    for (key, _) in std::env::vars() {
+        if key.starts_with("DATABASE") || key.starts_with("DB") || key.starts_with("POSTGRES") {
+            tracing::info!("   Found env var: {}", key);
+        }
+    }
+
     // Get port early - this MUST work or we can't start at all
     let port: u16 = std::env::var("PORT")
         .unwrap_or_else(|_| "10000".to_string())
