@@ -65,7 +65,9 @@ pub struct EmailSettings {
 
 #[derive(Debug, Clone)]
 pub enum StorageSettings {
-    Local { path: String },
+    Local {
+        path: String,
+    },
     S3 {
         bucket: String,
         region: String,
@@ -94,20 +96,20 @@ impl Settings {
                 environment: env::var("ENVIRONMENT").unwrap_or_else(|_| "development".to_string()),
             },
             database: DatabaseSettings {
-                url: env::var("DATABASE_URL")
-                    .map_err(|_| "DATABASE_URL is required")?,
+                url: Self::get_env_var("DATABASE_URL").ok_or("DATABASE_URL is required")?,
                 max_connections: env::var("DATABASE_MAX_CONNECTIONS")
                     .unwrap_or_else(|_| "10".to_string())
                     .parse()
                     .unwrap_or(10),
             },
             jwt: {
-                let secret = env::var("JWT_SECRET")
-                    .map_err(|_| "JWT_SECRET is required")?;
+                let secret = env::var("JWT_SECRET").map_err(|_| "JWT_SECRET is required")?;
 
                 // Enforce minimum secret length for security
                 if secret.len() < 32 {
-                    return Err("JWT_SECRET must be at least 32 characters for security".to_string());
+                    return Err(
+                        "JWT_SECRET must be at least 32 characters for security".to_string()
+                    );
                 }
 
                 JwtSettings {
@@ -146,9 +148,29 @@ impl Settings {
         })
     }
 
+    /// Helper to get environment variable with fallback for potential whitespace/hidden char issues
+    fn get_env_var(key: &str) -> Option<String> {
+        // Try exact match first
+        if let Ok(val) = env::var(key) {
+            return Some(val);
+        }
+
+        // Fallback: iterate and find key that matches when trimmed
+        for (k, v) in env::vars() {
+            if k.trim() == key {
+                tracing::warn!("⚠️ Found environment variable '{}' via fallback lookup (original key bytes: {:?})", key, k.as_bytes());
+                return Some(v);
+            }
+        }
+
+        None
+    }
+
     fn load_stripe_settings() -> Option<StripeSettings> {
         let secret_key = env::var("STRIPE_SECRET_KEY").ok()?;
-        if secret_key.is_empty() { return None; }
+        if secret_key.is_empty() {
+            return None;
+        }
 
         Some(StripeSettings {
             secret_key,
@@ -159,7 +181,9 @@ impl Settings {
 
     fn load_meilisearch_settings() -> Option<MeilisearchSettings> {
         let url = env::var("MEILISEARCH_URL").ok()?;
-        if url.is_empty() { return None; }
+        if url.is_empty() {
+            return None;
+        }
 
         Some(MeilisearchSettings {
             url,
@@ -169,7 +193,9 @@ impl Settings {
 
     fn load_email_settings() -> Option<EmailSettings> {
         let smtp_host = env::var("SMTP_HOST").ok()?;
-        if smtp_host.is_empty() { return None; }
+        if smtp_host.is_empty() {
+            return None;
+        }
 
         Some(EmailSettings {
             smtp_host,
@@ -181,8 +207,7 @@ impl Settings {
             smtp_password: env::var("SMTP_PASSWORD").unwrap_or_default(),
             from_email: env::var("FROM_EMAIL")
                 .unwrap_or_else(|_| "noreply@dach-marketplace.com".to_string()),
-            from_name: env::var("FROM_NAME")
-                .unwrap_or_else(|_| "DACH Marketplace".to_string()),
+            from_name: env::var("FROM_NAME").unwrap_or_else(|_| "DACH Marketplace".to_string()),
         })
     }
 
@@ -230,4 +255,3 @@ impl Settings {
         self.stripe.is_some()
     }
 }
-

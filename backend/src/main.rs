@@ -69,16 +69,21 @@ async fn main() -> anyhow::Result<()> {
     tracing::info!("🚀 Starting DACH Marketplace API v{}...", env!("CARGO_PKG_VERSION"));
 
     // Debug: Log key environment variables to diagnose issues
-    tracing::info!("🔍 Diagnosing environment variables:");
-    tracing::info!("   DATABASE_URL set: {}", std::env::var("DATABASE_URL").is_ok());
-    tracing::info!("   JWT_SECRET set: {}", std::env::var("JWT_SECRET").is_ok());
-    tracing::info!("   ENVIRONMENT: {:?}", std::env::var("ENVIRONMENT").ok());
-    tracing::info!("   PORT: {:?}", std::env::var("PORT").ok());
-    
-    // List ALL env vars starting with DATABASE, DB, POSTGRES (safe to log keys only)
+    tracing::info!("🔍 Diagnosing environment variables (v0.1.5):");
+    match std::env::var("DATABASE_URL") {
+        Ok(_) => tracing::info!("   DATABASE_URL is accessible via std::env::var"),
+        Err(e) => tracing::error!("   DATABASE_URL lookup failed: {:?}", e),
+    }
+
+    match std::env::var("JWT_SECRET") {
+        Ok(_) => tracing::info!("   JWT_SECRET is accessible via std::env::var"),
+        Err(e) => tracing::error!("   JWT_SECRET lookup failed: {:?}", e),
+    }
+
+    // List ALL env vars keys with their byte representation
     for (key, _) in std::env::vars() {
-        if key.starts_with("DATABASE") || key.starts_with("DB") || key.starts_with("POSTGRES") {
-            tracing::info!("   Found env var: {}", key);
+        if key.contains("DATABASE") || key.contains("DB") {
+            tracing::info!("   Found key '{}' (bytes: {:?})", key, key.as_bytes());
         }
     }
 
